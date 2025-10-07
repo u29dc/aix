@@ -1,0 +1,21 @@
+{
+	"manifest_version": 3,
+	"name": "AI Chat Markdown Exporter",
+	"version": "1.0.0",
+	"description": "Export ChatGPT and Claude conversations to clean markdown files with a single click.",
+	"icons": {
+		"16": "assets/icon-16.png",
+		"32": "assets/icon-32.png",
+		"128": "assets/icon-128.png"
+	},
+	"action": {
+		"default_title": "AI Chat Markdown Exporter"
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://chatgpt.com/*", "https://claude.ai/*"],
+			"js": ["contentScript.js"],
+			"run_at": "document_idle"
+		}
+	]
+}

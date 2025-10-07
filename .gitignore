@@ -1,0 +1,10 @@
+# Dependencies & build artifacts
+node_modules/
+.bun-cache/
+.tmp-bun/
+
+# OS / tooling noise
+.DS_Store
+
+# Local data samples & exports
+tmp/
