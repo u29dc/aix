@@ -61,13 +61,15 @@ describe('composeMarkdown', () => {
 			{ role: 'assistant', markdown: 'A1' },
 		];
 		const result = composeMarkdown(messages, 'Test', 'chatgpt', 'https://example.com');
-		expect(result).toContain('---');
+		const separator = '='.repeat(100);
+		expect(result).toContain(separator);
 	});
 
 	test('does not end with separator', () => {
 		const messages: Message[] = [{ role: 'user', markdown: 'Hello' }];
 		const result = composeMarkdown(messages, 'Test', 'chatgpt', 'https://example.com');
-		expect(result.trimEnd().endsWith('---')).toBe(false);
+		const separator = '='.repeat(100);
+		expect(result.trimEnd().endsWith(separator)).toBe(false);
 	});
 
 	test('handles empty message content', () => {
