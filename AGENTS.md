@@ -1,7 +1,3 @@
-# aix
-
-Chrome extension for exporting ChatGPT and Claude conversations to clean markdown files.
-
 ## 1. Documentation
 
 - **Extension**: `developer.chrome.com/docs/extensions/mv3`
