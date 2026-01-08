@@ -47,14 +47,14 @@
 
 ## 3. Stack
 
-| Layer | Choice | Notes |
-|-------|--------|-------|
-| Platform | Chrome Extension | Manifest V3, content script injection |
-| Language | TypeScript | Strict mode, tsgo for type checking |
-| Bundler | Bun | Build to single `dist/contentScript.js` |
-| Testing | Bun Test | happy-dom for DOM simulation |
-| Linting | Biome | Format + lint, replaces ESLint/Prettier |
-| Hooks | Husky | lint-staged + commitlint on pre-commit |
+| Layer    | Choice           | Notes                                   |
+| -------- | ---------------- | --------------------------------------- |
+| Platform | Chrome Extension | Manifest V3, content script injection   |
+| Language | TypeScript       | Strict mode, tsgo for type checking     |
+| Bundler  | Bun              | Build to single `dist/contentScript.js` |
+| Testing  | Bun Test         | happy-dom for DOM simulation            |
+| Linting  | Biome            | Format + lint, replaces ESLint/Prettier |
+| Hooks    | Husky            | lint-staged + commitlint on pre-commit  |
 
 ## 4. Commands
 
