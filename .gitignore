@@ -1,10 +1,33 @@
-# Dependencies & build artifacts
+# Dependencies
 node_modules/
+
+# Build output
+dist/
+
+# Bun
 .bun-cache/
 .tmp-bun/
+*.bun-build
 
 # OS / tooling noise
 .DS_Store
+Thumbs.db
 
 # Local data samples & exports
 tmp/
+.tmp/
+temp/
+.temp/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
