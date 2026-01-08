@@ -1,4 +1,4 @@
-export type Platform = 'chatgpt' | 'claude';
+export type Platform = 'claude';
 
 export interface Message {
 	role: 'user' | 'assistant';
