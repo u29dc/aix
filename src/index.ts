@@ -31,17 +31,26 @@ function bootstrap(): void {
  * Ensure the export button exists (with retry)
  */
 function ensureButton(): boolean {
+	// biome-ignore lint/suspicious/noConsole: debug logging
+	console.log('[AIX] ensureButton called, adapter:', !!adapter);
 	if (!adapter) return false;
 
-	if (!adapter.isEligibleConversation()) {
+	const isEligible = adapter.isEligibleConversation();
+	// biome-ignore lint/suspicious/noConsole: debug logging
+	console.log('[AIX] isEligibleConversation:', isEligible, 'pathname:', window.location.pathname);
+	if (!isEligible) {
 		removeButton();
 		return false;
 	}
 
 	const existing = document.getElementById(BUTTON_ID);
+	// biome-ignore lint/suspicious/noConsole: debug logging
+	console.log('[AIX] existing button:', existing, 'isConnected:', existing?.isConnected);
 	if (existing?.isConnected) return true;
 
 	const success = adapter.ensureButton();
+	// biome-ignore lint/suspicious/noConsole: debug logging
+	console.log('[AIX] adapter.ensureButton() result:', success);
 	if (success) {
 		const button = getButton();
 		if (button) {
@@ -119,8 +128,13 @@ function exportConversation(): string {
 
 // Initialize extension
 const platform = detectPlatform();
+// biome-ignore lint/suspicious/noConsole: debug logging
+console.log('[AIX] Platform detected:', platform);
 if (platform) {
 	adapter = getPlatformAdapter(platform);
 	injectStyles();
 	bootstrap();
+} else {
+	// biome-ignore lint/suspicious/noConsole: debug logging
+	console.log('[AIX] No platform detected, extension inactive');
 }

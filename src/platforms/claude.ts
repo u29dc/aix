@@ -19,59 +19,98 @@ export function isEligibleClaudeConversation(): boolean {
 export function ensureClaudeButton(): boolean {
 	if (document.getElementById(BUTTON_ID)?.isConnected) return true;
 
-	const container = document.querySelector('[data-testid="chat-actions"]') ?? document.querySelector('[data-testid="page-header"] [data-testid="chat-actions"]');
-	if (!container) return false;
-
-	const shareButton = Array.from(container.querySelectorAll('button')).find((btn) => btn.textContent?.trim().toLowerCase() === 'share');
-
-	const button = createButton(shareButton?.className ?? CLAUDE_SHARE_CLASS_FALLBACK);
-	if (shareButton?.nextSibling) {
-		container.insertBefore(button, shareButton.nextSibling);
-	} else {
-		container.appendChild(button);
-	}
+	// Create button as fixed overlay - doesn't depend on Claude's DOM structure
+	const button = createButton(CLAUDE_SHARE_CLASS_FALLBACK);
+	button.style.cssText = `
+		position: fixed !important;
+		bottom: 20px !important;
+		right: 20px !important;
+		z-index: 9999 !important;
+		padding: 8px 16px !important;
+		border-radius: 8px !important;
+		background: #1a1a1a !important;
+		color: #fff !important;
+		border: 1px solid #333 !important;
+		cursor: pointer !important;
+		font-size: 14px !important;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+	`;
+	document.body.appendChild(button);
+	// biome-ignore lint/suspicious/noConsole: debug logging
+	console.log('[AIX] Button injected as fixed overlay');
 	return true;
+}
+
+/**
+ * Find the chat container element
+ */
+function findChatRoot(): Element {
+	return document.querySelector('main') ?? document.querySelector('[data-testid="chat-main"]') ?? document.body;
+}
+
+/**
+ * Get the content source element for a message node
+ */
+function getMessageSource(node: Element, isUser: boolean): Element {
+	if (isUser) return node;
+	return node.querySelector('.font-claude-response .standard-markdown_, .font-claude-response .progressive-markdown_, .font-claude-response') ?? node;
+}
+
+/**
+ * Check if a message is currently streaming
+ */
+function isStreamingMessage(node: Element): boolean {
+	const streamingContainer = node.closest('[data-is-streaming]');
+	return streamingContainer?.getAttribute('data-is-streaming') === 'true';
+}
+
+/**
+ * Process a single message candidate and return the message if valid
+ */
+function processMessageCandidate(node: Element, lastFingerprint: string | null): { message: Message | null; fingerprint: string } {
+	const isUser = node.matches('[data-testid="user-message"]');
+	const role: 'user' | 'assistant' = isUser ? 'user' : 'assistant';
+	const source = getMessageSource(node, isUser);
+
+	const clone = source.cloneNode(true) as Element;
+	pruneNode(clone);
+
+	const rawText = clone.textContent?.trim() ?? '';
+	const markdown = convertNodeToMarkdown(clone).trim();
+	const fingerprint = `${role}:${rawText}`;
+
+	if (!markdown && !rawText) {
+		if (isStreamingMessage(node)) {
+			return {
+				message: { role, markdown: '> [Message is still streaming and was skipped]' },
+				fingerprint,
+			};
+		}
+		return { message: null, fingerprint };
+	}
+
+	if (fingerprint === lastFingerprint) {
+		return { message: null, fingerprint };
+	}
+
+	return { message: { role, markdown }, fingerprint };
 }
 
 /**
  * Extract conversation messages from Claude DOM
  */
 export function extractClaudeConversation(): Message[] {
-	const root = document.querySelector('main') ?? document.querySelector('[data-testid="chat-main"]') ?? document.body;
+	const root = findChatRoot();
 	const candidates = Array.from(root.querySelectorAll('[data-testid="user-message"], div[data-is-streaming]'));
 	const messages: Message[] = [];
 	let lastFingerprint: string | null = null;
 
 	for (const node of candidates) {
-		const isUser = node.matches('[data-testid="user-message"]');
-		const role: 'user' | 'assistant' = isUser ? 'user' : 'assistant';
-
-		const source = isUser ? node : (node.querySelector('.font-claude-response .standard-markdown_, .font-claude-response .progressive-markdown_, .font-claude-response') ?? node);
-
-		const clone = source.cloneNode(true) as Element;
-		pruneNode(clone);
-
-		const rawText = clone.textContent?.trim() ?? '';
-		const markdown = convertNodeToMarkdown(clone).trim();
-		const fingerprint = `${role}:${rawText}`;
-
-		if (!markdown && !rawText) {
-			const streamingContainer = node.closest('[data-is-streaming]');
-			if (streamingContainer?.getAttribute('data-is-streaming') === 'true') {
-				messages.push({
-					role,
-					markdown: '> [Message is still streaming and was skipped]',
-				});
-			}
-			continue;
+		const result = processMessageCandidate(node, lastFingerprint);
+		if (result.message) {
+			messages.push(result.message);
 		}
-
-		if (fingerprint === lastFingerprint) {
-			continue;
-		}
-
-		lastFingerprint = fingerprint;
-		messages.push({ role, markdown });
+		lastFingerprint = result.fingerprint;
 	}
 
 	return messages;
