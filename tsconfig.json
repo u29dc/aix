@@ -31,7 +31,8 @@
 		"types": ["bun-types"],
 
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@tests/*": ["./tests/*"]
 		}
 	},
 	"include": ["src/**/*", "tests/**/*"],
