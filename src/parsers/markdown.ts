@@ -131,12 +131,14 @@ export function composeMarkdown(messages: Message[], title: string, platform: Pl
 	lines.push(`- URL: ${url}`);
 	lines.push('');
 
+	const separator = '='.repeat(100);
+
 	for (const { role, markdown } of messages) {
 		const label = role === 'assistant' ? 'Assistant' : 'User';
 		lines.push(`**${label}:**`);
 		lines.push(markdown || '_No content available._');
 		lines.push('');
-		lines.push('---');
+		lines.push(separator);
 		lines.push('');
 	}
 
@@ -144,7 +146,7 @@ export function composeMarkdown(messages: Message[], title: string, platform: Pl
 	while (lines.length > 0 && lines[lines.length - 1]?.trim() === '') {
 		lines.pop();
 	}
-	if (lines.length > 0 && lines[lines.length - 1] === '---') {
+	if (lines.length > 0 && lines[lines.length - 1] === separator) {
 		lines.pop();
 	}
 	while (lines.length > 0 && lines[lines.length - 1]?.trim() === '') {
