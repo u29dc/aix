@@ -10,97 +10,112 @@ export type ConvertNodeFn = (node: Node, context?: ConversionContext) => string;
 const DEFAULT_CONTEXT: ConversionContext = { listDepth: 0 };
 
 /**
+ * Format a blockquote element as markdown
+ */
+function formatBlockquote(element: Element, context: ConversionContext): string {
+	const inner = collectChildrenMarkdown(element, context).trim();
+	if (!inner) return '';
+	return `${inner
+		.split('\n')
+		.map((line) => `> ${line}`)
+		.join('\n')}\n\n`;
+}
+
+/**
+ * Format a link element as markdown
+ */
+function formatLink(element: Element, context: ConversionContext): string {
+	const href = element.getAttribute('href') ?? '';
+	const label = collectChildrenMarkdown(element, context).trim() || href;
+	if (!href) return label;
+	return `[${label}](${href})`;
+}
+
+/**
+ * Format an image element as markdown
+ */
+function formatImage(element: Element): string {
+	const alt = element.getAttribute('alt') ?? 'Image';
+	const src = element.getAttribute('src') ?? '';
+	return src ? `![${alt}](${src})` : `![${alt}]`;
+}
+
+/**
+ * Format a heading element as markdown
+ */
+function formatHeading(element: Element, level: number, context: ConversionContext): string {
+	const hashes = '#'.repeat(Math.min(Math.max(level, 1), 6));
+	return `${hashes} ${collectChildrenMarkdown(element, context).trim()}\n\n`;
+}
+
+/**
+ * Format inline code element as markdown
+ */
+function formatInlineCode(element: Element): string {
+	if (element.parentElement?.tagName.toLowerCase() === 'pre') {
+		return '';
+	}
+	return wrapMarkdown('`', element.textContent ?? '');
+}
+
+/**
  * Convert a DOM node to markdown
  */
 export function convertNodeToMarkdown(node: Node, context: ConversionContext = DEFAULT_CONTEXT): string {
 	if (!node) return '';
-
-	if (node.nodeType === Node.TEXT_NODE) {
-		return escapeMarkdown(node.nodeValue ?? '');
-	}
-
-	if (node.nodeType !== Node.ELEMENT_NODE) {
-		return '';
-	}
+	if (node.nodeType === Node.TEXT_NODE) return escapeMarkdown(node.nodeValue ?? '');
+	if (node.nodeType !== Node.ELEMENT_NODE) return '';
 
 	const element = node as Element;
 	if (shouldSkipElement(element)) return '';
 
+	return convertElementToMarkdown(element, context);
+}
+
+/**
+ * Convert an element to markdown based on its tag
+ */
+function convertElementToMarkdown(element: Element, context: ConversionContext): string {
 	const tag = element.tagName.toLowerCase();
 
 	switch (tag) {
 		case 'p':
 			return `${collectChildrenMarkdown(element, context).trim()}\n\n`;
-
 		case 'br':
 			return '  \n';
-
 		case 'strong':
 		case 'b':
 			return wrapMarkdown('**', collectChildrenMarkdown(element, context));
-
 		case 'em':
 		case 'i':
 			return wrapMarkdown('*', collectChildrenMarkdown(element, context));
-
-		case 'code': {
-			if (element.parentElement?.tagName.toLowerCase() === 'pre') {
-				return '';
-			}
-			return wrapMarkdown('`', element.textContent ?? '');
-		}
-
+		case 'code':
+			return formatInlineCode(element);
 		case 'pre':
 			return formatCodeBlock(element);
-
 		case 'ul':
 			return formatList(element, context, false, convertNodeToMarkdown);
-
 		case 'ol':
 			return formatList(element, context, true, convertNodeToMarkdown);
-
 		case 'li':
 			return collectChildrenMarkdown(element, context).trim();
-
-		case 'blockquote': {
-			const inner = collectChildrenMarkdown(element, context).trim();
-			if (!inner) return '';
-			return `${inner
-				.split('\n')
-				.map((line) => `> ${line}`)
-				.join('\n')}\n\n`;
-		}
-
-		case 'a': {
-			const href = element.getAttribute('href') ?? '';
-			const label = collectChildrenMarkdown(element, context).trim() || href;
-			if (!href) return label;
-			return `[${label}](${href})`;
-		}
-
-		case 'img': {
-			const alt = element.getAttribute('alt') ?? 'Image';
-			const src = element.getAttribute('src') ?? '';
-			return src ? `![${alt}](${src})` : `![${alt}]`;
-		}
-
+		case 'blockquote':
+			return formatBlockquote(element, context);
+		case 'a':
+			return formatLink(element, context);
+		case 'img':
+			return formatImage(element);
 		case 'hr':
 			return '\n---\n\n';
-
 		case 'h1':
 		case 'h2':
 		case 'h3':
 		case 'h4':
 		case 'h5':
-		case 'h6': {
-			const level = Number(tag[1]);
-			const hashes = '#'.repeat(Math.min(Math.max(level, 1), 6));
-			return `${hashes} ${collectChildrenMarkdown(element, context).trim()}\n\n`;
-		}
-
+		case 'h6':
+			return formatHeading(element, Number(tag[1]), context);
 		case 'table':
 			return formatTable(element, convertNodeToMarkdown);
-
 		default:
 			return collectChildrenMarkdown(element, context);
 	}
@@ -120,9 +135,9 @@ export function collectChildrenMarkdown(element: Element, context: ConversionCon
 /**
  * Compose a full markdown document from messages
  */
-export function composeMarkdown(messages: Message[], title: string, platform: Platform, url: string): string {
+export function composeMarkdown(messages: Message[], title: string, _platform: Platform, url: string): string {
 	const timestamp = new Date().toISOString();
-	const platformName = platform === 'chatgpt' ? 'ChatGPT' : 'Claude';
+	const platformName = 'Claude';
 
 	const lines: string[] = [];
 	lines.push(`# ${title || 'AI Conversation'}`);
