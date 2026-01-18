@@ -13,11 +13,11 @@ export function formatTable(tableElement: Element, convertNode: ConvertNodeFn): 
 	const headerCells = Array.from((headerRow as HTMLTableRowElement).cells);
 	if (!headerCells.length) return '';
 
-	const headers = headerCells.map((cell) => convertNode(cell).trim() || ' ');
+	const headers = headerCells.map((cell) => escapeTableCell(convertNode(cell)) || ' ');
 	const divider = headers.map(() => '---');
 	const bodyRows = rows.map((row) => {
 		const cells = Array.from((row as HTMLTableRowElement).cells);
-		return cells.map((cell) => convertNode(cell).trim());
+		return cells.map((cell) => escapeTableCell(convertNode(cell)));
 	});
 
 	const lines: string[] = [];
@@ -31,4 +31,10 @@ export function formatTable(tableElement: Element, convertNode: ConvertNodeFn): 
 	}
 
 	return `${lines.join('\n')}\n\n`;
+}
+
+function escapeTableCell(value: string): string {
+	const trimmed = value.trim();
+	if (!trimmed) return '';
+	return trimmed.replace(/\|/g, '\\|').replace(/\r?\n+/g, '<br>');
 }

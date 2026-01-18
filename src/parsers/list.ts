@@ -14,10 +14,11 @@ export function formatList(listElement: Element, context: ConversionContext, ord
 	for (const child of Array.from(listElement.children)) {
 		if (child.tagName?.toLowerCase() === 'li') {
 			const value = ordered ? `${index}. ` : '- ';
+			const continuation = ' '.repeat(value.length);
 			const content = convertNode(child, nextContext).trim();
 			const lines = content.split('\n');
 			const firstLine = `${indent}${value}${lines.shift() ?? ''}`;
-			const extraLines = lines.map((line) => `${indent}${ordered ? '   ' : '  '}${line}`);
+			const extraLines = lines.map((line) => `${indent}${continuation}${line}`);
 			items.push([firstLine, ...extraLines].join('\n'));
 			if (ordered) index += 1;
 		}
