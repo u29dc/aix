@@ -1,9 +1,10 @@
-import { BUTTON_ID, CLAUDE_SHARE_CLASS_FALLBACK } from '@/constants';
+import { BUTTON_ID, CLAUDE_SHARE_CLASS_FALLBACK, SANITIZE_SELECTORS } from '@/constants';
 import { convertNodeToMarkdown } from '@/parsers';
+import { sanitizeElement } from '@/parsers/sanitizer';
+import { buildCombinedSelector, CLAUDE_SELECTORS, querySelector } from '@/platforms/selectors';
 import type { PlatformConfig } from '@/platforms/types';
 import type { Message } from '@/types';
 import { createButton } from '@/ui/button';
-import { pruneNode } from '@/utils/dom';
 
 /**
  * Check if current page is an eligible Claude conversation
@@ -45,7 +46,7 @@ export function ensureClaudeButton(): boolean {
  * Find the chat container element
  */
 function findChatRoot(): Element {
-	return document.querySelector('main') ?? document.querySelector('[data-testid="chat-main"]') ?? document.body;
+	return querySelector(document, CLAUDE_SELECTORS.chatContainer) ?? document.body;
 }
 
 /**
@@ -53,7 +54,7 @@ function findChatRoot(): Element {
  */
 function getMessageSource(node: Element, isUser: boolean): Element {
 	if (isUser) return node;
-	return node.querySelector('.font-claude-response .standard-markdown_, .font-claude-response .progressive-markdown_, .font-claude-response') ?? node;
+	return querySelector(node, CLAUDE_SELECTORS.messageContent) ?? node;
 }
 
 /**
@@ -67,33 +68,34 @@ function isStreamingMessage(node: Element): boolean {
 /**
  * Process a single message candidate and return the message if valid
  */
-function processMessageCandidate(node: Element, lastFingerprint: string | null): { message: Message | null; fingerprint: string } {
-	const isUser = node.matches('[data-testid="user-message"]');
+const USER_SELECTOR = buildCombinedSelector(CLAUDE_SELECTORS.userMessage);
+const ASSISTANT_SELECTOR = buildCombinedSelector(CLAUDE_SELECTORS.assistantMessage);
+const MESSAGE_SELECTOR = `${USER_SELECTOR}, ${ASSISTANT_SELECTOR}`;
+
+function isSystemMessage(node: Element): boolean {
+	return node.closest('[data-message-author-role="system"]') !== null;
+}
+
+function processMessageCandidate(node: Element): Message | null {
+	if (isSystemMessage(node)) return null;
+	const isUser = node.matches(USER_SELECTOR);
 	const role: 'user' | 'assistant' = isUser ? 'user' : 'assistant';
 	const source = getMessageSource(node, isUser);
 
-	const clone = source.cloneNode(true) as Element;
-	pruneNode(clone);
+	const sanitized = sanitizeElement(source, {
+		removeSelectors: SANITIZE_SELECTORS,
+	});
 
-	const rawText = clone.textContent?.trim() ?? '';
-	const markdown = convertNodeToMarkdown(clone).trim();
-	const fingerprint = `${role}:${rawText}`;
+	const markdown = convertNodeToMarkdown(sanitized).trimEnd();
 
-	if (!markdown && !rawText) {
+	if (!markdown.trim()) {
 		if (isStreamingMessage(node)) {
-			return {
-				message: { role, markdown: '> [Message is still streaming and was skipped]' },
-				fingerprint,
-			};
+			return { role, markdown: '> [Message is still streaming and was skipped]' };
 		}
-		return { message: null, fingerprint };
+		return null;
 	}
 
-	if (fingerprint === lastFingerprint) {
-		return { message: null, fingerprint };
-	}
-
-	return { message: { role, markdown }, fingerprint };
+	return { role, markdown };
 }
 
 /**
@@ -101,16 +103,12 @@ function processMessageCandidate(node: Element, lastFingerprint: string | null):
  */
 export function extractClaudeConversation(): Message[] {
 	const root = findChatRoot();
-	const candidates = Array.from(root.querySelectorAll('[data-testid="user-message"], div[data-is-streaming]'));
+	const candidates = Array.from(root.querySelectorAll(MESSAGE_SELECTOR)).filter((node) => node.parentElement?.closest(MESSAGE_SELECTOR) === null);
 	const messages: Message[] = [];
-	let lastFingerprint: string | null = null;
 
 	for (const node of candidates) {
-		const result = processMessageCandidate(node, lastFingerprint);
-		if (result.message) {
-			messages.push(result.message);
-		}
-		lastFingerprint = result.fingerprint;
+		const message = processMessageCandidate(node);
+		if (message) messages.push(message);
 	}
 
 	return messages;
@@ -129,6 +127,7 @@ export function deriveClaudeTitle(): string {
 
 export const claudeAdapter: PlatformConfig = {
 	platform: 'claude',
+	displayName: 'Claude',
 	ensureButton: ensureClaudeButton,
 	extractConversation: extractClaudeConversation,
 	deriveTitle: deriveClaudeTitle,

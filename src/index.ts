@@ -119,7 +119,7 @@ function exportConversation(): string {
 	}
 
 	const title = adapter.deriveTitle() || 'AI Conversation';
-	const markdown = composeMarkdown(messages, title, adapter.platform, window.location.href);
+	const markdown = composeMarkdown(messages, title, adapter.platform, adapter.displayName, window.location.href);
 	const filename = buildFilename(title, adapter.platform);
 
 	triggerDownload(markdown, filename);

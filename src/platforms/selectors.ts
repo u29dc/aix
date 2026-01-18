@@ -3,7 +3,7 @@
  */
 export interface SelectorConfig {
 	primary: string;
-	fallbacks: string[];
+	fallbacks: readonly string[];
 }
 
 /**
@@ -19,8 +19,15 @@ export const CLAUDE_SELECTORS = {
 		fallbacks: ['[data-testid*="assistant"]', '.assistant-message', '[class*="claude-response"]'],
 	},
 	messageContent: {
-		primary: '.font-claude-response .standard-markdown_',
-		fallbacks: ['.font-claude-response .progressive-markdown_', '.font-claude-response', '.markdown', '.prose'],
+		primary: '.font-claude-response .standard-markdown',
+		fallbacks: [
+			'.font-claude-response .standard-markdown_',
+			'.font-claude-response .progressive-markdown',
+			'.font-claude-response .progressive-markdown_',
+			'.font-claude-response',
+			'.markdown',
+			'.prose',
+		],
 	},
 	chatContainer: {
 		primary: 'main',
