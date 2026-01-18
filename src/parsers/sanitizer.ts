@@ -1,24 +1,9 @@
+import { SANITIZE_SELECTORS } from '@/constants';
+
 /**
  * Default selectors for elements that should be removed during sanitization
  */
-export const DEFAULT_REMOVE_SELECTORS = [
-	'script',
-	'style',
-	'svg',
-	'button',
-	'input',
-	'textarea',
-	'form',
-	'[aria-hidden="true"]',
-	'[role="img"]',
-	'.copy-button',
-	'[data-testid*="copy"]',
-	'[data-testid="message-actions"]',
-	'[data-testid="hover-card"]',
-	'[data-testid="action-bar-copy"]',
-	'.sr-only',
-	'.visually-hidden',
-] as const;
+export const DEFAULT_REMOVE_SELECTORS = SANITIZE_SELECTORS;
 
 /**
  * Options for sanitization
@@ -37,8 +22,9 @@ export function sanitizeElement(element: Element, options: SanitizeOptions = {})
 
 	const clone = element.cloneNode(true) as Element;
 
-	for (const selector of removeSelectors) {
-		const elements = clone.querySelectorAll(selector);
+	const selectors = removeSelectors.filter((selector) => selector.length > 0);
+	if (selectors.length > 0) {
+		const elements = clone.querySelectorAll(selectors.join(', '));
 		for (const el of Array.from(elements)) {
 			el.remove();
 		}
@@ -61,7 +47,9 @@ function removeEmptyTextNodes(element: Element): void {
 	let node = walker.nextNode();
 
 	while (node) {
-		if (node.textContent?.trim() === '') {
+		const parent = node.parentElement;
+		const inCodeBlock = parent?.closest('pre, code') !== null;
+		if (!inCodeBlock && node.textContent?.trim() === '') {
 			nodesToRemove.push(node);
 		}
 		node = walker.nextNode();
