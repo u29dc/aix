@@ -183,7 +183,7 @@ describe('extractClaudeConversation', () => {
 		expect(messages[0]?.markdown).toContain('skipped');
 	});
 
-	test('deduplicates consecutive identical messages', () => {
+	test('preserves consecutive identical messages', () => {
 		const wrapper1 = createElement('div');
 		const wrapper2 = createElement('div');
 
@@ -196,7 +196,7 @@ describe('extractClaudeConversation', () => {
 		container.appendChild(wrapper2);
 
 		const messages = extractClaudeConversation();
-		expect(messages).toHaveLength(1);
+		expect(messages).toHaveLength(2);
 	});
 
 	test('extracts message with inline formatting', () => {
@@ -210,6 +210,18 @@ describe('extractClaudeConversation', () => {
 		expect(messages).toHaveLength(1);
 		expect(messages[0]?.markdown).toContain('**bold**');
 		expect(messages[0]?.markdown).toContain('`code`');
+	});
+
+	test('skips hidden elements inside message content', () => {
+		const hidden = createElement('span', { style: 'display: none' }, ['Secret']);
+		const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [createElement('p', undefined, ['Visible ', hidden])]);
+		const assistantMsg = createClaudeAssistantMessage(content);
+		container.appendChild(assistantMsg);
+
+		const messages = extractClaudeConversation();
+		expect(messages).toHaveLength(1);
+		expect(messages[0]?.markdown).toContain('Visible');
+		expect(messages[0]?.markdown).not.toContain('Secret');
 	});
 
 	test('extracts message with code block', () => {

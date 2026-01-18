@@ -3,7 +3,7 @@ import { formatList } from '@/parsers/list';
 import { formatTable } from '@/parsers/table';
 import type { ConversionContext, Message, Platform } from '@/types';
 import { shouldSkipElement } from '@/utils/dom';
-import { escapeMarkdown, normalizeSpacing, wrapMarkdown } from '@/utils/markdown';
+import { escapeMarkdown, normalizeMarkdown, wrapInlineCode, wrapMarkdown } from '@/utils/markdown';
 
 export type ConvertNodeFn = (node: Node, context?: ConversionContext) => string;
 
@@ -55,7 +55,7 @@ function formatInlineCode(element: Element): string {
 	if (element.parentElement?.tagName.toLowerCase() === 'pre') {
 		return '';
 	}
-	return wrapMarkdown('`', element.textContent ?? '');
+	return wrapInlineCode(element.textContent ?? '');
 }
 
 /**
@@ -135,9 +135,9 @@ export function collectChildrenMarkdown(element: Element, context: ConversionCon
 /**
  * Compose a full markdown document from messages
  */
-export function composeMarkdown(messages: Message[], title: string, _platform: Platform, url: string): string {
+export function composeMarkdown(messages: Message[], title: string, platform: Platform, platformLabel: string, url: string): string {
 	const timestamp = new Date().toISOString();
-	const platformName = 'Claude';
+	const platformName = platformLabel || platform;
 
 	const lines: string[] = [];
 	lines.push(`# ${title || 'AI Conversation'}`);
@@ -168,5 +168,5 @@ export function composeMarkdown(messages: Message[], title: string, _platform: P
 		lines.pop();
 	}
 
-	return `${normalizeSpacing(lines.join('\n')).trimEnd()}\n`;
+	return `${normalizeMarkdown(lines.join('\n')).trimEnd()}\n`;
 }
