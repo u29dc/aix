@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { detectLanguage, escapeMarkdown, normalizeSpacing, pickFence, wrapMarkdown } from '@/utils/markdown';
+import { detectLanguage, escapeMarkdown, normalizeMarkdown, normalizeSpacing, pickFence, wrapInlineCode, wrapMarkdown } from '@/utils/markdown';
 
 describe('escapeMarkdown', () => {
 	test('returns empty string for empty input', () => {
@@ -62,6 +62,23 @@ describe('wrapMarkdown', () => {
 	});
 });
 
+describe('wrapInlineCode', () => {
+	test('wraps inline code without trimming', () => {
+		expect(wrapInlineCode('  code  ')).toBe('`  code  `');
+	});
+
+	test('uses longer fence when value contains backticks', () => {
+		const wrapped = wrapInlineCode('use `ticks`');
+		expect(wrapped.startsWith('``')).toBe(true);
+		expect(wrapped.endsWith('``')).toBe(true);
+		expect(wrapped).toContain('use `ticks`');
+	});
+
+	test('returns empty string for whitespace-only value', () => {
+		expect(wrapInlineCode('   ')).toBe('');
+	});
+});
+
 describe('normalizeSpacing', () => {
 	test('removes trailing spaces on lines', () => {
 		expect(normalizeSpacing('hello   \nworld')).toBe('hello\nworld');
@@ -81,6 +98,23 @@ describe('normalizeSpacing', () => {
 
 	test('handles mixed trailing whitespace and newlines', () => {
 		expect(normalizeSpacing('a  \n\n\n\nb')).toBe('a\n\nb');
+	});
+});
+
+describe('normalizeMarkdown', () => {
+	test('preserves fenced code block whitespace', () => {
+		const input = ['```', 'line 1', '', 'line 3', '```', '', '', 'after'].join('\n');
+		expect(normalizeMarkdown(input)).toBe(['```', 'line 1', '', 'line 3', '```', '', 'after'].join('\n'));
+	});
+
+	test('collapses extra blank lines outside code blocks', () => {
+		const input = 'a\n\n\n\nb';
+		expect(normalizeMarkdown(input)).toBe('a\n\nb');
+	});
+
+	test('preserves soft line breaks', () => {
+		const input = 'line one  \nline two';
+		expect(normalizeMarkdown(input)).toBe('line one  \nline two');
 	});
 });
 
