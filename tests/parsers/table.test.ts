@@ -135,6 +135,15 @@ describe('formatTable', () => {
 			const result = formatTable(table, convertNodeToMarkdown);
 			expect(result).toContain('|   | Data |');
 		});
+
+		test('escapes pipes and newlines in cells', () => {
+			const headerRow = createElement('tr', undefined, [createElement('th', undefined, ['Name | Type'])]);
+			const bodyRow = createElement('tr', undefined, [createElement('td', undefined, ['Line 1\nLine 2'])]);
+			const table = createElement('table', undefined, [headerRow, bodyRow]);
+			const result = formatTable(table, convertNodeToMarkdown);
+			expect(result).toContain('Name \\| Type');
+			expect(result).toContain('Line 1<br>Line 2');
+		});
 	});
 
 	describe('fixture-based tests', () => {
