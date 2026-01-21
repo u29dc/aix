@@ -13,25 +13,33 @@
 │   ├── types.ts
 │   ├── parsers/
 │   │   ├── code-block.ts
+│   │   ├── index.ts
 │   │   ├── list.ts
 │   │   ├── markdown.ts
+│   │   ├── sanitizer.ts
 │   │   └── table.ts
 │   ├── platforms/
+│   │   ├── chatgpt.ts
 │   │   ├── claude.ts
+│   │   ├── index.ts
+│   │   ├── selectors.ts
 │   │   └── types.ts
 │   ├── ui/
 │   │   ├── button.ts
+│   │   ├── index.ts
 │   │   ├── styles.ts
 │   │   └── toast.ts
 │   └── utils/
 │       ├── dom.ts
 │       ├── download.ts
 │       ├── filename.ts
+│       ├── index.ts
 │       ├── markdown.ts
 │       └── navigation.ts
 ├── tests/
 │   ├── setup.ts
 │   ├── parsers/
+│   ├── platforms/
 │   ├── ui/
 │   └── utils/
 ├── assets/
@@ -70,7 +78,7 @@
 ## 5. Architecture
 
 - **Entry**: `src/index.ts` detects platform, injects export button, handles click → parse → download flow
-- **Platforms**: `src/platforms/claude.ts` implements `PlatformAdapter` interface with `getMessages()`, `getTitle()`, `getConversationUrl()`, `getButtonContainer()`, `getExistingButton()`
+- **Platforms**: `src/platforms/{claude,chatgpt}.ts` implement `PlatformAdapter` interface with `getMessages()`, `getTitle()`, `getConversationUrl()`, `getButtonContainer()`, `getExistingButton()`; `selectors.ts` provides robust fallback selectors for each platform
 - **Parsers**: `src/parsers/` converts DOM elements to markdown; `markdown.ts` composes final output with 100-char `=` separator between messages
 - **UI**: `src/ui/button.ts` creates styled export button, `src/ui/toast.ts` shows success/error notifications
 - **Utils**: DOM helpers, filename sanitization, blob download trigger, markdown text conversion
@@ -86,6 +94,6 @@
 ## 7. Quality
 
 - Quality gate after changes: `bun run util:check` (format, lint, types, test)
-- All 240 tests must pass before commit
+- All 262 tests must pass before commit
 - Pre-commit: Husky + lint-staged runs `util:check`
 - Commits: Always use Conventional Commits format `type(scope): description` with body required; read allowed types/scopes from `commitlint.config.js`
