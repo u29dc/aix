@@ -46,6 +46,26 @@ describe('convertNodeToMarkdown', () => {
 			expect(convertNodeToMarkdown(el)).toBe('*italic text*');
 		});
 
+		test('converts del to strikethrough markdown', () => {
+			const el = createElement('del', undefined, ['strike']);
+			expect(convertNodeToMarkdown(el)).toBe('~~strike~~');
+		});
+
+		test('preserves underline with HTML tag', () => {
+			const el = createElement('u', undefined, ['underline']);
+			expect(convertNodeToMarkdown(el)).toBe('<u>underline</u>');
+		});
+
+		test('preserves superscript with HTML tag', () => {
+			const el = createElement('sup', undefined, ['1']);
+			expect(convertNodeToMarkdown(el)).toBe('<sup>1</sup>');
+		});
+
+		test('preserves subscript with HTML tag', () => {
+			const el = createElement('sub', undefined, ['2']);
+			expect(convertNodeToMarkdown(el)).toBe('<sub>2</sub>');
+		});
+
 		test('converts inline code', () => {
 			const el = createElement('code', undefined, ['const x = 1']);
 			expect(convertNodeToMarkdown(el)).toBe('`const x = 1`');
@@ -71,6 +91,16 @@ describe('convertNodeToMarkdown', () => {
 			const em = createElement('em', undefined, ['italic']);
 			const container = createElement('span', undefined, [strong, em]);
 			expect(convertNodeToMarkdown(container)).toBe('**bold and***italic*');
+		});
+
+		test('converts checkbox input to task list marker', () => {
+			const el = createElement('input', { type: 'checkbox', checked: 'true' }, []);
+			expect(convertNodeToMarkdown(el)).toBe('[x] ');
+		});
+
+		test('converts unchecked checkbox input to task list marker', () => {
+			const el = createElement('input', { type: 'checkbox' }, []);
+			expect(convertNodeToMarkdown(el)).toBe('[ ] ');
 		});
 	});
 
