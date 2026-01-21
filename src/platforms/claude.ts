@@ -114,41 +114,53 @@ function formatListSection(label: string, entries: string[]): string {
 	return lines.join('\n');
 }
 
+function collectLeafTexts(card: Element): string[] {
+	const leafTexts: string[] = [];
+	const walker = document.createTreeWalker(card, NodeFilter.SHOW_ELEMENT);
+	let current = walker.nextNode();
+
+	while (current) {
+		const element = current as Element;
+		const isLeafElement = element.childElementCount === 0;
+		const isNotButton = !element.closest('button');
+		const isNotSvg = element.tagName.toLowerCase() !== 'svg';
+
+		if (isLeafElement && isNotButton && isNotSvg) {
+			const text = normalizeInlineText(element.textContent ?? '');
+			if (text) leafTexts.push(text);
+		}
+		current = walker.nextNode();
+	}
+
+	return leafTexts;
+}
+
+function extractCardTitleAndMeta(card: Element): { title: string; meta: string } {
+	const clamped = Array.from(card.querySelectorAll('[class*="line-clamp-"]'));
+	const clampedTitle = normalizeInlineText(clamped[0]?.textContent ?? '');
+	const clampedMeta = normalizeInlineText(clamped[1]?.textContent ?? '');
+
+	if (clampedTitle) return { title: clampedTitle, meta: clampedMeta };
+
+	const leafTexts = collectLeafTexts(card);
+	const [fallbackTitle = '', fallbackMeta = ''] = uniqueStrings(leafTexts);
+	return { title: fallbackTitle, meta: fallbackMeta };
+}
+
+function formatArtifactEntry(title: string, meta: string): string {
+	if (meta) return `${escapeMarkdown(title)} (${escapeMarkdown(meta)})`;
+	return escapeMarkdown(title);
+}
+
 function extractArtifactEntries(node: Element): string[] {
 	const cards = Array.from(node.querySelectorAll(ARTIFACT_CARD_SELECTOR));
 	if (cards.length === 0) return [];
 
 	const entries: string[] = [];
 	for (const card of cards) {
-		const clamped = Array.from(card.querySelectorAll('[class*="line-clamp-"]'));
-		let title = normalizeInlineText(clamped[0]?.textContent ?? '');
-		let meta = normalizeInlineText(clamped[1]?.textContent ?? '');
-
-		if (!title) {
-			const leafTexts: string[] = [];
-			const walker = document.createTreeWalker(card, NodeFilter.SHOW_ELEMENT);
-			let current = walker.nextNode();
-
-			while (current) {
-				const element = current as Element;
-				if (element.childElementCount === 0 && !element.closest('button') && element.tagName.toLowerCase() !== 'svg') {
-					const text = normalizeInlineText(element.textContent ?? '');
-					if (text) leafTexts.push(text);
-				}
-				current = walker.nextNode();
-			}
-
-			const [fallbackTitle, fallbackMeta] = uniqueStrings(leafTexts);
-			title = title || fallbackTitle || '';
-			meta = meta || fallbackMeta || '';
-		}
-
+		const { title, meta } = extractCardTitleAndMeta(card);
 		if (!title) continue;
-		if (meta) {
-			entries.push(`${escapeMarkdown(title)} (${escapeMarkdown(meta)})`);
-		} else {
-			entries.push(escapeMarkdown(title));
-		}
+		entries.push(formatArtifactEntry(title, meta));
 	}
 
 	return uniqueStrings(entries);
