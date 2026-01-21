@@ -5,6 +5,7 @@ import { buildCombinedSelector, CLAUDE_SELECTORS, querySelector } from '@/platfo
 import type { PlatformConfig } from '@/platforms/types';
 import type { Message } from '@/types';
 import { createButton } from '@/ui/button';
+import { escapeMarkdown } from '@/utils/markdown';
 
 /**
  * Check if current page is an eligible Claude conversation
@@ -71,22 +72,159 @@ function isStreamingMessage(node: Element): boolean {
 const USER_SELECTOR = buildCombinedSelector(CLAUDE_SELECTORS.userMessage);
 const ASSISTANT_SELECTOR = buildCombinedSelector(CLAUDE_SELECTORS.assistantMessage);
 const MESSAGE_SELECTOR = `${USER_SELECTOR}, ${ASSISTANT_SELECTOR}`;
+const MARKDOWN_BLOCK_SELECTORS = ['.standard-markdown', '.standard-markdown_', '.progressive-markdown', '.progressive-markdown_', '.markdown', '.prose'].join(', ');
+const ARTIFACT_CARD_SELECTOR = '[aria-label="Preview contents"]';
+const FILE_THUMBNAIL_SELECTOR = '[data-testid="file-thumbnail"]';
 
 function isSystemMessage(node: Element): boolean {
 	return node.closest('[data-message-author-role="system"]') !== null;
+}
+
+function normalizeInlineText(value: string): string {
+	return value.replace(/\s+/g, ' ').trim();
+}
+
+function uniqueStrings(values: string[]): string[] {
+	const seen = new Set<string>();
+	const output: string[] = [];
+	for (const value of values) {
+		const normalized = normalizeInlineText(value);
+		if (!normalized || seen.has(normalized)) continue;
+		seen.add(normalized);
+		output.push(normalized);
+	}
+	return output;
+}
+
+function selectInnermost(elements: Element[]): Element[] {
+	return elements.filter((element) => !elements.some((other) => other !== element && element.contains(other)));
+}
+
+function collectMarkdownBlocks(node: Element): Element[] {
+	const blocks = Array.from(node.querySelectorAll(MARKDOWN_BLOCK_SELECTORS));
+	if (blocks.length === 0) return [];
+	const standardBlocks = blocks.filter((block) => block.classList.contains('standard-markdown') || block.classList.contains('standard-markdown_'));
+	const preferred = standardBlocks.length > 0 ? standardBlocks : blocks;
+	return selectInnermost(preferred);
+}
+
+function formatListSection(label: string, entries: string[]): string {
+	if (entries.length === 0) return '';
+	const lines = [`**${label}:**`, ...entries.map((entry) => `- ${entry}`)];
+	return lines.join('\n');
+}
+
+function extractArtifactEntries(node: Element): string[] {
+	const cards = Array.from(node.querySelectorAll(ARTIFACT_CARD_SELECTOR));
+	if (cards.length === 0) return [];
+
+	const entries: string[] = [];
+	for (const card of cards) {
+		const clamped = Array.from(card.querySelectorAll('[class*="line-clamp-"]'));
+		let title = normalizeInlineText(clamped[0]?.textContent ?? '');
+		let meta = normalizeInlineText(clamped[1]?.textContent ?? '');
+
+		if (!title) {
+			const leafTexts: string[] = [];
+			const walker = document.createTreeWalker(card, NodeFilter.SHOW_ELEMENT);
+			let current = walker.nextNode();
+
+			while (current) {
+				const element = current as Element;
+				if (element.childElementCount === 0 && !element.closest('button') && element.tagName.toLowerCase() !== 'svg') {
+					const text = normalizeInlineText(element.textContent ?? '');
+					if (text) leafTexts.push(text);
+				}
+				current = walker.nextNode();
+			}
+
+			const [fallbackTitle, fallbackMeta] = uniqueStrings(leafTexts);
+			title = title || fallbackTitle || '';
+			meta = meta || fallbackMeta || '';
+		}
+
+		if (!title) continue;
+		if (meta) {
+			entries.push(`${escapeMarkdown(title)} (${escapeMarkdown(meta)})`);
+		} else {
+			entries.push(escapeMarkdown(title));
+		}
+	}
+
+	return uniqueStrings(entries);
+}
+
+function extractUserAttachments(node: Element): string[] {
+	const wrapper = node.closest('[data-test-render-count]');
+	if (!wrapper) return [];
+
+	const thumbnails = Array.from(wrapper.querySelectorAll(FILE_THUMBNAIL_SELECTOR));
+	if (thumbnails.length === 0) return [];
+
+	const entries = thumbnails
+		.map((thumb) => {
+			const name = normalizeInlineText(thumb.querySelector('h3')?.textContent ?? '');
+			const type = normalizeInlineText(thumb.querySelector('p')?.textContent ?? '');
+			if (!name && !type) return '';
+			if (type) return `${escapeMarkdown(name || 'Attachment')} (${escapeMarkdown(type)})`;
+			return escapeMarkdown(name || 'Attachment');
+		})
+		.filter((entry) => entry.length > 0);
+
+	return uniqueStrings(entries);
+}
+
+function extractAssistantMarkdown(node: Element): string {
+	const blocks = collectMarkdownBlocks(node);
+	const markdownChunks: string[] = [];
+
+	if (blocks.length > 0) {
+		const seen = new Set<string>();
+		for (const block of blocks) {
+			const sanitized = sanitizeElement(block, {
+				removeSelectors: SANITIZE_SELECTORS,
+			});
+			const markdown = convertNodeToMarkdown(sanitized).trim();
+			if (!markdown || seen.has(markdown)) continue;
+			seen.add(markdown);
+			markdownChunks.push(markdown);
+		}
+	} else {
+		const source = getMessageSource(node, false);
+		const sanitized = sanitizeElement(source, {
+			removeSelectors: SANITIZE_SELECTORS,
+		});
+		const markdown = convertNodeToMarkdown(sanitized).trim();
+		if (markdown) markdownChunks.push(markdown);
+	}
+
+	const artifacts = extractArtifactEntries(node);
+	const artifactSection = formatListSection('Artifacts', artifacts);
+	if (artifactSection) markdownChunks.push(artifactSection);
+
+	return markdownChunks.join('\n\n').trimEnd();
+}
+
+function extractUserMarkdown(node: Element): string {
+	const sanitized = sanitizeElement(node, {
+		removeSelectors: SANITIZE_SELECTORS,
+	});
+	const markdownChunks: string[] = [];
+	const markdown = convertNodeToMarkdown(sanitized).trim();
+	if (markdown) markdownChunks.push(markdown);
+
+	const attachments = extractUserAttachments(node);
+	const attachmentSection = formatListSection('Attachments', attachments);
+	if (attachmentSection) markdownChunks.push(attachmentSection);
+
+	return markdownChunks.join('\n\n').trimEnd();
 }
 
 function processMessageCandidate(node: Element): Message | null {
 	if (isSystemMessage(node)) return null;
 	const isUser = node.matches(USER_SELECTOR);
 	const role: 'user' | 'assistant' = isUser ? 'user' : 'assistant';
-	const source = getMessageSource(node, isUser);
-
-	const sanitized = sanitizeElement(source, {
-		removeSelectors: SANITIZE_SELECTORS,
-	});
-
-	const markdown = convertNodeToMarkdown(sanitized).trimEnd();
+	const markdown = isUser ? extractUserMarkdown(node) : extractAssistantMarkdown(node);
 
 	if (!markdown.trim()) {
 		if (isStreamingMessage(node)) {
