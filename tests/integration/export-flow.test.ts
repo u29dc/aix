@@ -36,6 +36,21 @@ describe('Claude Export Flow Integration', () => {
 			expect(markdown).toContain('**Assistant:**');
 			expect(markdown).toContain('Hello');
 		});
+
+		test('exports assistant message with multiple markdown sections', () => {
+			const thinking = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [createElement('p', undefined, ['Thinking block text'])]);
+			const answer = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [createElement('p', undefined, ['Final response text'])]);
+			const content = createElement('div', undefined, [thinking, answer]);
+
+			container.appendChild(createClaudeAssistantMessage(content));
+
+			const messages = extractClaudeConversation();
+			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+
+			expect(markdown).toContain('Thinking block text');
+			expect(markdown).toContain('Final response text');
+			expect(markdown.indexOf('Thinking block text')).toBeLessThan(markdown.indexOf('Final response text'));
+		});
 	});
 
 	describe('multi-turn conversation export', () => {
