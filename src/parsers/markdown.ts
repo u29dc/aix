@@ -59,6 +59,16 @@ function formatInlineCode(element: Element): string {
 }
 
 /**
+ * Format checkbox input element as markdown
+ */
+function formatCheckboxInput(element: Element): string {
+	const type = element.getAttribute('type')?.toLowerCase();
+	if (type !== 'checkbox') return '';
+	const checked = element.hasAttribute('checked') || element.getAttribute('aria-checked') === 'true';
+	return checked ? '[x] ' : '[ ] ';
+}
+
+/**
  * Convert a DOM node to markdown
  */
 export function convertNodeToMarkdown(node: Node, context: ConversionContext = DEFAULT_CONTEXT): string {
@@ -89,10 +99,22 @@ function convertElementToMarkdown(element: Element, context: ConversionContext):
 		case 'em':
 		case 'i':
 			return wrapMarkdown('*', collectChildrenMarkdown(element, context));
+		case 'del':
+		case 's':
+		case 'strike':
+			return wrapMarkdown('~~', collectChildrenMarkdown(element, context));
+		case 'u':
+			return `<u>${collectChildrenMarkdown(element, context)}</u>`;
+		case 'sup':
+			return `<sup>${collectChildrenMarkdown(element, context)}</sup>`;
+		case 'sub':
+			return `<sub>${collectChildrenMarkdown(element, context)}</sub>`;
 		case 'code':
 			return formatInlineCode(element);
 		case 'pre':
 			return formatCodeBlock(element);
+		case 'input':
+			return formatCheckboxInput(element);
 		case 'ul':
 			return formatList(element, context, false, convertNodeToMarkdown);
 		case 'ol':
