@@ -44,6 +44,36 @@ export const CLAUDE_SELECTORS = {
 } as const;
 
 /**
+ * ChatGPT-specific selectors with fallbacks for robustness against UI changes
+ */
+export const CHATGPT_SELECTORS = {
+	conversationTurn: {
+		primary: 'article[data-testid^="conversation-turn"]',
+		fallbacks: ['[data-testid^="conversation-turn"]'],
+	},
+	message: {
+		primary: '[data-message-author-role]',
+		fallbacks: ['[data-message-author-role="user"]', '[data-message-author-role="assistant"]'],
+	},
+	userMessage: {
+		primary: '[data-message-author-role="user"]',
+		fallbacks: ['article[data-turn="user"] [data-message-author-role="user"]', '[data-turn="user"]'],
+	},
+	assistantMessage: {
+		primary: '[data-message-author-role="assistant"]',
+		fallbacks: ['article[data-turn="assistant"] [data-message-author-role="assistant"]', '[data-turn="assistant"]'],
+	},
+	messageContent: {
+		primary: '.markdown',
+		fallbacks: ['.whitespace-pre-wrap', '.prose'],
+	},
+	chatContainer: {
+		primary: 'main',
+		fallbacks: ['[role="main"]', '#main'],
+	},
+} as const;
+
+/**
  * Query for a single element using primary selector with fallbacks
  */
 export function querySelector(root: Element | Document, config: SelectorConfig): Element | null {

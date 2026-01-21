@@ -1,0 +1,252 @@
+<div class="markdown prose dark:prose-invert w-full break-words light deep-research-result markdown-new-styling"><pre class="overflow-visible! px-0!" data-start="0" data-end="128"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">yaml</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-yaml"><span><span><span class="hljs-attr">title:</span></span><span> </span><span><span class="hljs-string">"Chat Export → Markdown Fixture"</span></span><span>
+</span><span><span class="hljs-attr">date:</span></span><span> </span><span><span class="hljs-string">"2026-01-18"</span></span><span>
+</span><span><span class="hljs-attr">tags:</span></span><span> [</span><span><span class="hljs-string">markdown</span></span><span>, </span><span><span class="hljs-string">exporter-test</span></span><span>, </span><span><span class="hljs-string">chat</span></span><span>]
+</span><span><span class="hljs-attr">source:</span></span><span> </span><span><span class="hljs-string">"synthetic"</span></span><span>
+</span></span></code></div></div></pre>
+<h1 data-start="130" data-end="155">Markdown Export Fixture</h1>
+<p data-start="157" data-end="345">This message is intentionally packed with formatting edge cases: <strong data-start="222" data-end="230">bold</strong>, <em data-start="232" data-end="240">italic</em>, <em data-start="242" data-end="259"><strong data-start="243" data-end="258">bold+italic</strong></em>, <del data-start="261" data-end="278">strikethrough</del>, &lt;u&gt;underline via HTML&lt;/u&gt;, and <code data-start="311" data-end="344">inline code like x = y &amp;&amp; a &lt; b</code>.</p>
+<p data-start="347" data-end="441">Escaping tests: *not italic*, __not bold__, `not code`, and a literal backslash: <code data-start="436" data-end="440">\\</code>.</p>
+<p data-start="443" data-end="568">Inline punctuation/quotes: “smart quotes”, 'single quotes', and <code data-start="507" data-end="524">"double quotes"</code>.<br>
+Special chars: <code data-start="541" data-end="548">&amp; &lt; &gt;</code> should stay intact.</p>
+<h2 data-start="570" data-end="599">Anchors and internal links</h2>
+<ul data-start="601" data-end="703">
+<li data-start="601" data-end="647">
+<p data-start="603" data-end="647">Jump to the table section: <a data-start="630" data-end="647" class="decorated-link cursor-pointer" rel="noopener">Tables<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"><use href="/cdn/assets/sprites-core-k5zux585.svg#304883" fill="currentColor"></use></svg></span></a></p>
+</li>
+<li data-start="648" data-end="703">
+<p data-start="650" data-end="703">Jump to the code section: <a data-start="676" data-end="703" class="decorated-link cursor-pointer" rel="noopener">Code Blocks<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"><use href="/cdn/assets/sprites-core-k5zux585.svg#304883" fill="currentColor"></use></svg></span></a></p>
+</li>
+</ul>
+<h2 data-start="705" data-end="719">Blockquotes</h2>
+<blockquote data-start="721" data-end="915">
+<p data-start="723" data-end="785">Plain blockquote line 1<br data-start="746" data-end="749">
+line 2 (explicit line break above)</p>
+<p data-start="790" data-end="857"><strong data-start="790" data-end="824">Inline formatting inside quote</strong>: <code data-start="826" data-end="832">code</code>, <em data-start="834" data-end="844">emphasis</em>, <del data-start="846" data-end="856">strike</del>.</p>
+<blockquote data-start="862" data-end="915">
+<p data-start="864" data-end="884">Nested quote level 2</p>
+<blockquote data-start="893" data-end="915">
+<p data-start="895" data-end="915">Nested quote level 3</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote data-start="917" data-end="1032">
+<p data-start="919" data-end="1032">[!NOTE]<br>
+“Callout” style blockquote used by some renderers (not standard Markdown, good for robustness testing).</p>
+</blockquote>
+<h2 data-start="1034" data-end="1042">Lists</h2>
+<h3 data-start="1044" data-end="1070">Unordered with nesting</h3>
+<ul data-start="1072" data-end="1231">
+<li data-start="1072" data-end="1176">
+<p data-start="1074" data-end="1080">Item A</p>
+<ul data-start="1083" data-end="1176">
+<li data-start="1083" data-end="1163">
+<p data-start="1085" data-end="1093">Item A.1</p>
+<ul data-start="1098" data-end="1163">
+<li data-start="1098" data-end="1110">
+<p data-start="1100" data-end="1110">Item A.1.a</p>
+</li>
+<li data-start="1115" data-end="1163">
+<p data-start="1117" data-end="1163">Item A.1.b with <code data-start="1133" data-end="1148">inline_code()</code> and <del data-start="1153" data-end="1163">strike</del></p>
+</li>
+</ul>
+</li>
+<li data-start="1166" data-end="1176">
+<p data-start="1168" data-end="1176">Item A.2</p>
+</li>
+</ul>
+</li>
+<li data-start="1177" data-end="1185">
+<p data-start="1179" data-end="1185">Item B</p>
+</li>
+<li data-start="1186" data-end="1231">
+<p data-start="1188" data-end="1231">Item C with an escaped asterisk: * literal</p>
+</li>
+</ul>
+<h3 data-start="1233" data-end="1263">Ordered with mixed nesting</h3>
+<ol data-start="1265" data-end="1391">
+<li data-start="1265" data-end="1276">
+<p data-start="1268" data-end="1276">Step one</p>
+</li>
+<li data-start="1277" data-end="1377">
+<p data-start="1280" data-end="1288">Step two</p>
+<ul data-start="1292" data-end="1377">
+<li data-start="1292" data-end="1306">
+<p data-start="1294" data-end="1306">subpoint 2.a</p>
+</li>
+<li data-start="1310" data-end="1377">
+<p data-start="1312" data-end="1324">subpoint 2.b</p>
+<ol data-start="1330" data-end="1377">
+<li data-start="1330" data-end="1350">
+<p data-start="1333" data-end="1350">sub-sub ordered i</p>
+</li>
+<li data-start="1356" data-end="1377">
+<p data-start="1359" data-end="1377">sub-sub ordered ii</p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li data-start="1378" data-end="1391">
+<p data-start="1381" data-end="1391">Step three</p>
+</li>
+</ol>
+<h3 data-start="1393" data-end="1406">Task list</h3>
+<ul class="contains-task-list" data-start="1408" data-end="1534">
+<li class="task-list-item" data-start="1408" data-end="1430">
+<p data-start="1414" data-end="1430"><input disabled="" type="checkbox"> todo: un-checked</p>
+</li>
+<li class="task-list-item" data-start="1431" data-end="1450">
+<p data-start="1437" data-end="1450"><input disabled="" type="checkbox" checked=""> done: checked</p>
+</li>
+<li class="task-list-item" data-start="1451" data-end="1534">
+<p data-start="1457" data-end="1486"><input disabled="" type="checkbox"> todo with <strong data-start="1467" data-end="1475">bold</strong> and <code data-start="1480" data-end="1486">code</code></p>
+<ul class="contains-task-list" data-start="1489" data-end="1534">
+<li class="task-list-item" data-start="1489" data-end="1509">
+<p data-start="1495" data-end="1509"><input disabled="" type="checkbox" checked=""> nested checked</p>
+</li>
+<li class="task-list-item" data-start="1512" data-end="1534">
+<p data-start="1518" data-end="1534"><input disabled="" type="checkbox"> nested unchecked</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 data-start="1536" data-end="1545">Tables</h2>
+<div class="TyagGW_tableContainer"><div tabindex="-1" class="group TyagGW_tableWrapper flex flex-col-reverse w-fit"><table data-start="1547" data-end="1848" class="w-fit min-w-(--thread-content-width)"><thead data-start="1547" data-end="1606"><tr data-start="1547" data-end="1606"><th data-start="1547" data-end="1562" data-col-size="sm" style="text-align: left;">Left aligned</th><th data-start="1562" data-end="1579" data-col-size="sm" style="text-align: center;">Center aligned</th><th data-start="1579" data-end="1595" data-col-size="sm" style="text-align: right;">Right aligned</th><th data-start="1595" data-end="1606" data-col-size="sm" style="text-align: left;">Escapes</th></tr></thead><tbody data-start="1666" data-end="1848"><tr data-start="1666" data-end="1724"><td data-start="1666" data-end="1680" data-col-size="sm" style="text-align: left;"><code data-start="1668" data-end="1674">code</code></td><td data-start="1680" data-end="1697" data-col-size="sm" style="text-align: center;"><strong data-start="1682" data-end="1690">bold</strong></td><td data-start="1697" data-end="1713" data-col-size="sm" style="text-align: right;">1234</td><td data-start="1713" data-end="1724" data-col-size="sm" style="text-align: left;">a | b</td></tr><tr data-start="1725" data-end="1783"><td data-start="1725" data-end="1739" data-col-size="sm" style="text-align: left;"><em data-start="1727" data-end="1735">italic</em></td><td data-start="1739" data-end="1756" data-col-size="sm" style="text-align: center;"><del data-start="1741" data-end="1751">strike</del></td><td data-start="1756" data-end="1772" data-col-size="sm" style="text-align: right;">12.34</td><td data-start="1772" data-end="1783" data-col-size="sm" style="text-align: left;">\n</td></tr><tr data-start="1784" data-end="1848"><td data-start="1784" data-end="1801" data-col-size="sm" style="text-align: left;">H&lt;sub&gt;2&lt;/sub&gt;O</td><td data-start="1801" data-end="1817" data-col-size="sm" style="text-align: center;">x&lt;sup&gt;2&lt;/sup&gt;</td><td data-start="1817" data-end="1833" data-col-size="sm" style="text-align: right;">-1</td><td data-start="1833" data-end="1848" data-col-size="sm" style="text-align: left;">&lt;tag&gt;</td></tr></tbody></table><div class="sticky h-0 select-none end-(--thread-content-margin) self-end"><div class="absolute end-0 flex items-end" style="height: 33px;"><span class="" data-state="closed"><button aria-label="Copy table" class="hover:bg-token-bg-tertiary text-token-text-secondary my-1 rounded-sm p-1 transition-opacity group-[:not(:hover):not(:focus-within)]:pointer-events-none group-[:not(:hover):not(:focus-within)]:opacity-0"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg></button></span></div></div></div></div>
+<h2 data-start="1850" data-end="1864">Code Blocks</h2>
+<h3 data-start="1866" data-end="1882">Plain fenced</h3>
+<pre class="overflow-visible! px-0!" data-start="1884" data-end="1970"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">kotlin</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre!"><span><span>This </span><span><span class="hljs-keyword">is</span></span><span> a plain fenced block.
+It should preserve    spaces and tabs	like </span><span><span class="hljs-keyword">this</span></span><span>.
+</span></span></code></div></div></pre>
+<h3 data-start="1972" data-end="1999">Language-tagged: Python</h3>
+<pre class="overflow-visible! px-0!" data-start="2001" data-end="2361"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">python</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-python"><span><span><span class="hljs-keyword">from</span></span><span> dataclasses </span><span><span class="hljs-keyword">import</span></span><span> dataclass
+
+</span><span><span class="hljs-meta">@dataclass(<span class="hljs-params">frozen=<span class="hljs-literal">True</span></span></span></span><span>)
+</span><span><span class="hljs-keyword">class</span></span><span> </span><span><span class="hljs-title class_">User</span></span><span>:
+    name: </span><span><span class="hljs-built_in">str</span></span><span>
+    active: </span><span><span class="hljs-built_in">bool</span></span><span> = </span><span><span class="hljs-literal">True</span></span><span>
+
+</span><span><span class="hljs-keyword">def</span></span><span> </span><span><span class="hljs-title function_">greet</span></span><span>(</span><span><span class="hljs-params">user: User</span></span><span>) -&gt; </span><span><span class="hljs-built_in">str</span></span><span>:
+    </span><span><span class="hljs-comment"># includes characters that often get mangled in exports:</span></span><span>
+    </span><span><span class="hljs-comment"># quotes " ' , braces {}, brackets [], and unicode: café 漢字</span></span><span>
+    </span><span><span class="hljs-keyword">return</span></span><span> </span><span><span class="hljs-string">f'Hello, <span class="hljs-subst">{user.name}</span></span></span><span>! active=</span><span><span class="hljs-subst">{user.active}</span></span><span>'
+
+</span><span><span class="hljs-built_in">print</span></span><span>(greet(User(</span><span><span class="hljs-string">"Han"</span></span><span>)))
+</span></span></code></div></div></pre>
+<h3 data-start="2363" data-end="2394">Language-tagged: JavaScript</h3>
+<pre class="overflow-visible! px-0!" data-start="2396" data-end="2517"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">js</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-js"><span><span><span class="hljs-keyword">const</span></span><span> obj = { </span><span><span class="hljs-attr">a</span></span><span>: </span><span><span class="hljs-number">1</span></span><span>, </span><span><span class="hljs-attr">b</span></span><span>: </span><span><span class="hljs-string">"text"</span></span><span>, </span><span><span class="hljs-attr">nested</span></span><span>: { </span><span><span class="hljs-attr">ok</span></span><span>: </span><span><span class="hljs-literal">true</span></span><span> } };
+</span><span><span class="hljs-variable language_">console</span></span><span>.</span><span><span class="hljs-title function_">log</span></span><span>(</span><span><span class="hljs-string">`template literal: a=<span class="hljs-subst">${obj.a}</span></span></span><span>, b=</span><span><span class="hljs-subst">${obj.b}</span></span><span>`);
+</span></span></code></div></div></pre>
+<h3 data-start="2519" data-end="2580">Language-tagged: JSON (with URL-like strings inside code)</h3>
+<pre class="overflow-visible! px-0!" data-start="2582" data-end="2855"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">json</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-json"><span><span><span class="hljs-punctuation">{</span></span><span>
+  </span><span><span class="hljs-attr">"string"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-string">"text"</span></span><span><span class="hljs-punctuation">,</span></span><span>
+  </span><span><span class="hljs-attr">"number"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-number">123</span></span><span><span class="hljs-punctuation">,</span></span><span>
+  </span><span><span class="hljs-attr">"float"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-number">12.34</span></span><span><span class="hljs-punctuation">,</span></span><span>
+  </span><span><span class="hljs-attr">"bool"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-literal"><span class="hljs-keyword">true</span></span></span><span></span><span><span class="hljs-punctuation">,</span></span><span>
+  </span><span><span class="hljs-attr">"null"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-literal"><span class="hljs-keyword">null</span></span></span><span></span><span><span class="hljs-punctuation">,</span></span><span>
+  </span><span><span class="hljs-attr">"array"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-punctuation">[</span></span><span><span class="hljs-number">1</span></span><span><span class="hljs-punctuation">,</span></span><span> </span><span><span class="hljs-number">2</span></span><span><span class="hljs-punctuation">,</span></span><span> </span><span><span class="hljs-number">3</span></span><span><span class="hljs-punctuation">,</span></span><span> </span><span><span class="hljs-punctuation">{</span></span><span><span class="hljs-attr">"k"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-string">"v"</span></span><span><span class="hljs-punctuation">}</span></span><span><span class="hljs-punctuation">]</span></span><span><span class="hljs-punctuation">,</span></span><span>
+  </span><span><span class="hljs-attr">"path"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-string">"/relative/path/file.md"</span></span><span><span class="hljs-punctuation">,</span></span><span>
+  </span><span><span class="hljs-attr">"url"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-string">"https://example.com/path?x=1#frag"</span></span><span><span class="hljs-punctuation">,</span></span><span>
+  </span><span><span class="hljs-attr">"weird"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-string">"quotes: \"double\", 'single', backtick: `"</span></span><span>
+</span><span><span class="hljs-punctuation">}</span></span><span>
+</span></span></code></div></div></pre>
+<h3 data-start="2857" data-end="2882">Language-tagged: Bash</h3>
+<pre class="overflow-visible! px-0!" data-start="2884" data-end="2989"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">bash</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-bash"><span><span><span class="hljs-built_in">set</span></span><span> -euo pipefail
+name=</span><span><span class="hljs-string">"world"</span></span><span>
+</span><span><span class="hljs-built_in">echo</span></span><span> </span><span><span class="hljs-string">"hello, <span class="hljs-variable">${name}</span></span></span><span>"
+</span><span><span class="hljs-built_in">printf</span></span><span> </span><span><span class="hljs-string">'tabs\tand spaces    preserved\n'</span></span><span>
+</span></span></code></div></div></pre>
+<h3 data-start="2991" data-end="3005">Diff block</h3>
+<pre class="overflow-visible! px-0!" data-start="3007" data-end="3094"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">diff</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-diff"><span><span><span class="hljs-deletion">- removed line</span></span><span>
+</span><span><span class="hljs-addition">+ added line</span></span><span>
+</span><span><span class="hljs-meta">@@ -1,3 +1,3 @@</span></span><span>
+</span><span><span class="hljs-deletion">- old_value = 1</span></span><span>
+</span><span><span class="hljs-addition">+ new_value = 2</span></span><span>
+</span></span></code></div></div></pre>
+<h3 data-start="3096" data-end="3145">Fence-in-fence test (triple backticks inside)</h3>
+<pre class="overflow-visible! px-0!" data-start="3147" data-end="3372"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">markdown</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-markdown"><span><span><span class="hljs-code">```txt
+This is a code fence *inside* another fence.
+It contains ``` </span>triple backticks as text? Not here—those would end the fence.
+<span class="hljs-code">```
+
+Tip: your exporter should preserve the outer fence length (4 backticks).
+</span></span></span></code></div></div></pre>
+<h3 data-start="3374" data-end="3396">Tilde-fenced block</h3>
+<pre class="overflow-visible! px-0!" data-start="3398" data-end="3473"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">txt</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-txt"><span><span>Tilde fence variant.
+Useful if you normalize fences incorrectly.
+</span></span></code></div></div></pre>
+<h2 data-start="3475" data-end="3499">“Thinking” block test</h2>
+<pre class="overflow-visible! px-0!" data-start="3501" data-end="3795"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">thinking</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-thinking"><span>THINKING (synthetic example for export testing)
+- This is NOT actual hidden reasoning.
+- It is just a code-fenced block with a custom info string ("thinking").
+- Edge cases:
+  * bullet list inside fenced block
+  * punctuation: [] {} () &lt;&gt; &amp; " ' `
+  * unicode: 🧪 café 漢字 العربية
+</span></code></div></div></pre>
+<h2 data-start="3797" data-end="3804">Math</h2>
+<p data-start="3806" data-end="3870">Inline math: $E = mc^2$ and $\alpha + \beta \rightarrow \gamma$.</p>
+<p data-start="3872" data-end="3883">Block math:</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>i</mi><mo>=</mo><mfrac><mrow><mi>n</mi><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\sum_{i=1}^{n} i = \frac{n(n+1)}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 2.9291em; vertical-align: -1.2777em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 1.6514em;"><span style="top: -1.8723em; margin-left: 0em;"><span class="pstrut" style="height: 3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top: -3.05em;"><span class="pstrut" style="height: 3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top: -4.3em; margin-left: 0em;"><span class="pstrut" style="height: 3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 1.2777em;"><span></span></span></span></span></span><span class="mspace" style="margin-right: 0.1667em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right: 0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.2778em;"></span></span><span class="base"><span class="strut" style="height: 2.113em; vertical-align: -0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 1.427em;"><span style="top: -2.314em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord">2</span></span></span><span style="top: -3.23em;"><span class="pstrut" style="height: 3em;"></span><span class="frac-line" style="border-bottom-width: 0.04em;"></span></span><span style="top: -3.677em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right: 0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.2222em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span>
+<h2 data-start="3928" data-end="3946">Mermaid diagram</h2>
+<pre class="overflow-visible! px-0!" data-start="3948" data-end="4073"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="flex items-center text-token-text-secondary px-4 py-2 text-xs font-sans justify-between h-9 bg-token-sidebar-surface-primary select-none rounded-t-2xl corner-t-superellipse/1.1">mermaid</div><div class="sticky top-[calc(--spacing(9)+var(--header-height))] @w-xl/main:top-9"><div class="absolute end-0 bottom-0 flex h-9 items-center pe-2"><div class="bg-token-bg-elevated-secondary text-token-text-secondary flex items-center gap-4 rounded-sm px-2 font-sans text-xs"><button class="flex gap-1 items-center select-none py-1" aria-label="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon-sm"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg>Copy code</button></div></div></div><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-mermaid"><span>graph TD
+  A[Start] --&gt; B{Decision}
+  B --&gt;|Yes| C[Path 1]
+  B --&gt;|No| D[Path 2]
+  C --&gt; E[End]
+  D --&gt; E[End]
+</span></code></div></div></pre>
+<h2 data-start="4075" data-end="4089">HTML blocks</h2>
+&lt;div&gt;
+  &lt;strong&gt;Inline HTML block&lt;/strong&gt;
+  &lt;p&gt;Paragraph inside HTML. Some exporters sanitize this; others keep it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;details&gt;
+&lt;summary&gt;Expandable section (details/summary)&lt;/summary&gt;
+<p data-start="4287" data-end="4315">Inside the collapsible area:</p>
+<ul data-start="4317" data-end="4404">
+<li data-start="4317" data-end="4330">
+<p data-start="4319" data-end="4330">list item 1</p>
+</li>
+<li data-start="4331" data-end="4363">
+<p data-start="4333" data-end="4363">list item 2 with <code data-start="4350" data-end="4363">inline code</code></p>
+</li>
+<li data-start="4364" data-end="4404">
+<p data-start="4366" data-end="4404">a blank line below should be preserved</p>
+</li>
+</ul>
+<p data-start="4406" data-end="4424">And a small table:</p>
+<div class="TyagGW_tableContainer"><div tabindex="-1" class="group TyagGW_tableWrapper flex flex-col-reverse w-fit"><table data-start="4426" data-end="4465" class="w-fit min-w-(--thread-content-width)"><thead data-start="4426" data-end="4435"><tr data-start="4426" data-end="4435"><th data-start="4426" data-end="4430" data-col-size="sm">k</th><th data-start="4430" data-end="4435" data-col-size="sm">v</th></tr></thead><tbody data-start="4446" data-end="4465"><tr data-start="4446" data-end="4455"><td data-start="4446" data-end="4450" data-col-size="sm">a</td><td data-start="4450" data-end="4455" data-col-size="sm">1</td></tr><tr data-start="4456" data-end="4465"><td data-start="4456" data-end="4460" data-col-size="sm">b</td><td data-start="4460" data-end="4465" data-col-size="sm">2</td></tr></tbody></table><div class="sticky h-0 select-none end-(--thread-content-margin) self-end"><div class="absolute end-0 flex items-end" style="height: 33px;"><span class="" data-state="closed"><button aria-label="Copy table" class="hover:bg-token-bg-tertiary text-token-text-secondary my-1 rounded-sm p-1 transition-opacity group-[:not(:hover):not(:focus-within)]:pointer-events-none group-[:not(:hover):not(:focus-within)]:opacity-0"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" class="icon"><use href="/cdn/assets/sprites-core-k5zux585.svg#ce3544" fill="currentColor"></use></svg></button></span></div></div></div></div>
+&lt;/details&gt;
+<h2 data-start="4479" data-end="4491">Footnotes</h2>
+<p data-start="4493" data-end="4570">This sentence has a footnote reference.<sup data-start="4532" data-end="4546"><a id="user-content-fnref-export-note" data-footnote-ref="true" aria-describedby="footnote-label" data-start="4532" data-end="4546" class="decorated-link cursor-pointer" rel="noopener">1<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"><use href="/cdn/assets/sprites-core-k5zux585.svg#304883" fill="currentColor"></use></svg></span></a></sup> And another one.<sup data-start="4563" data-end="4570"><a id="user-content-fnref-edge" data-footnote-ref="true" aria-describedby="footnote-label" data-start="4563" data-end="4570" class="decorated-link cursor-pointer" rel="noopener">2<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"><use href="/cdn/assets/sprites-core-k5zux585.svg#304883" fill="currentColor"></use></svg></span></a></sup></p>
+<h2 data-start="4753" data-end="4789">Unicode and directionality stress</h2>
+<ul data-start="4791" data-end="4927">
+<li data-start="4791" data-end="4809">
+<p data-start="4793" data-end="4809">Emoji: 🧪 🧵 ✅ ❌</p>
+</li>
+<li data-start="4810" data-end="4842">
+<p data-start="4812" data-end="4842">Accents: café, naïve, jalapeño</p>
+</li>
+<li data-start="4843" data-end="4867">
+<p data-start="4845" data-end="4867">CJK: 汉字 / 漢字 / かな / 한글</p>
+</li>
+<li data-start="4868" data-end="4927">
+<p data-start="4870" data-end="4927">RTL sample: العربية (directionality may vary by renderer)</p>
+</li>
+</ul>
+<h2 data-start="4929" data-end="4948">Horizontal rules</h2>
+<hr data-start="4950" data-end="4953">
+<hr data-start="4955" data-end="4958">
+<hr data-start="4960" data-end="4963">
+<h2 data-start="4965" data-end="4982">Final sentinel</h2>
+<p data-start="4984" data-end="5006" data-is-last-node=""><code data-start="4984" data-end="5006" data-is-last-node="">&lt;&lt;&lt;END-OF-FIXTURE&gt;&gt;&gt;</code></p>
+<section data-footnotes="true" class="footnotes"><h2 class="sr-only" id="footnote-label">Footnotes</h2>
+<ol>
+<li id="user-content-fn-export-note" data-start="4572" data-end="4641">
+<p data-start="4588" data-end="4641">Footnote content with <strong data-start="4610" data-end="4618">bold</strong>, <em data-start="4620" data-end="4628">italic</em>, and <code data-start="4634" data-end="4640">code</code>. <a data-footnote-backref="" aria-label="Back to reference 1" class="decorated-link cursor-pointer" rel="noopener">↩<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"><use href="/cdn/assets/sprites-core-k5zux585.svg#304883" fill="currentColor"></use></svg></span></a></p>
+</li>
+<li id="user-content-fn-edge" data-start="4642" data-end="4751">
+<p data-start="4651" data-end="4751">Footnote with tricky chars: backtick ` asterisk * underscore _ and a fake path <code data-start="4733" data-end="4750">C:\temp\file.md</code>. <a data-footnote-backref="" aria-label="Back to reference 2" class="decorated-link cursor-pointer" rel="noopener">↩<span aria-hidden="true" class="ms-0.5 inline-block align-middle leading-none"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" aria-hidden="true" data-rtl-flip="" class="block h-[0.75em] w-[0.75em] stroke-current stroke-[0.75]"><use href="/cdn/assets/sprites-core-k5zux585.svg#304883" fill="currentColor"></use></svg></span></a></p>
+</li>
+</ol>
+</section></div>
