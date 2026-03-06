@@ -17,14 +17,14 @@
 		"util:check": "STATUS=0; bun run util:format || STATUS=1; bun run util:lint || STATUS=1; bun run util:types || STATUS=1; bun test --concurrent || STATUS=1; exit $STATUS"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.4",
-		"@commitlint/cli": "^20.4.2",
-		"@commitlint/config-conventional": "^20.4.2",
-		"@happy-dom/global-registrator": "^20.7.0",
-		"@typescript/native-preview": "^7.0.0-dev.20260222.1",
-		"bun-types": "^1.3.9",
+		"@biomejs/biome": "^2.4.6",
+		"@commitlint/cli": "^20.4.3",
+		"@commitlint/config-conventional": "^20.4.3",
+		"@happy-dom/global-registrator": "^20.8.3",
+		"@typescript/native-preview": "^7.0.0-dev.20260306.1",
+		"bun-types": "^1.3.10",
 		"husky": "^9.1.7",
-		"lint-staged": "^16.2.7",
+		"lint-staged": "^16.3.2",
 		"terser": "^5.46.0",
 		"typescript": "^5.9.3"
 	}
