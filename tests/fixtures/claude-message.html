@@ -1,3 +1,151 @@
-<main><div data-test-render-count="2"><div class="mb-1 mt-6 group"><div class="flex flex-col items-end gap-1"><div class="group relative inline-flex gap-2 bg-bg-300 rounded-xl"><div class="flex flex-row gap-2 relative"><div class="flex-1"><div data-testid="user-message" class="font-large !font-user-message grid grid-cols-1 gap-2 py-0.5 relative"><p class="whitespace-pre-wrap break-words">Hello, can you help me test the chat exporter?</p></div></div></div></div></div></div></div><div data-test-render-count="1"><div class="group" style="height: auto; opacity: 1; transform: none"><div data-is-streaming="false" class="group relative relative pb-3"><div class="font-claude-response relative leading-[1.65rem]"><div class="standard-markdown grid-cols-1 grid gap-4"><p class="font-claude-response-body break-words whitespace-normal">Of course! Here's a response with <strong>bold text</strong>, <em>italic text</em>, and <code>inline code</code>.</p><h2 class="font-claude-response-heading">Code Example</h2><pre class="code-block__code !my-0 !rounded-lg !text-sm !leading-relaxed"><code class="language-typescript">function greet(name: string): string {
+<main>
+  <div data-test-render-count="1">
+    <div class="mb-1 mt-6 group">
+      <div class="flex flex-col items-end gap-1">
+        <div class="group relative inline-flex gap-2 bg-bg-300 rounded-xl pl-2.5 py-2.5">
+          <div class="flex flex-row gap-2 relative">
+            <div class="flex-1">
+              <div data-testid="user-message" class="font-large !font-user-message grid grid-cols-1 gap-2 py-0.5 relative">
+                <p class="whitespace-pre-wrap break-words">Hello, can you help me test the chat exporter?</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-start opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition" role="group" aria-label="Message actions">
+          <div class="text-text-300">
+            <div class="text-text-300 flex items-stretch justify-between">
+              <span class="text-text-500 text-xs flex items-center mr-2" data-state="closed">Feb 13</span>
+              <div class="flex items-center">
+                <div class="w-fit" data-state="closed"><button type="button" aria-label="Copy"></button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div data-test-render-count="1">
+    <div class="group" style="height: auto; opacity: 1; transform: none;">
+      <div class="contents">
+        <div data-is-streaming="false" class="group relative relative pb-3" style="opacity: 1; transform: none;">
+          <div class="font-claude-response relative leading-[1.65rem]">
+            <div>
+              <div class="grid grid-rows-[auto_auto] min-w-0">
+                <div class="row-start-1 col-start-1 min-w-0">
+                  <div class="min-w-0 pl-2 py-1.5">
+                    <button class="group/status flex items-center gap-2 py-1 text-sm" aria-expanded="false">
+                      <div class="inline-flex items-center gap-1 min-w-0">
+                        <span class="truncate text-sm font-base">Thought for 1s</span>
+                      </div>
+                    </button>
+                    <span class="sr-only" role="status" aria-live="polite">Thought for 1s</span>
+                  </div>
+                </div>
+                <div class="row-start-2 col-start-1 relative grid isolate min-w-0">
+                  <div class="row-start-1 col-start-1 relative z-[2] min-w-0">
+                    <div>
+                      <div class="standard-markdown grid-cols-1 grid [&_>*]:min-w-0 gap-3 standard-markdown">
+                        <p>Of course! Here's a response with <strong>bold text</strong>, <em>italic text</em>, and <code>inline code</code>.</p>
+                        <h2>Code Example</h2>
+                        <pre><code class="language-typescript">function greet(name: string): string {
   return `Hello, ${name}!`;
-}</code></pre><h3 class="font-claude-response-heading">A List</h3><ul class="list-disc space-y-2.5 pl-7"><li class="whitespace-normal break-words">First item</li><li class="whitespace-normal break-words">Second item with <strong>bold</strong></li><li class="whitespace-normal break-words">Third item</li></ul><h3 class="font-claude-response-heading">A Table</h3><table><tr><th>Name</th><th>Value</th></tr><tr><td>Alpha</td><td>100</td></tr><tr><td>Beta</td><td>200</td></tr></table><blockquote class="border-l-4 border-border-300 pl-4">This is a blockquote with some important information.</blockquote></div></div></div></div></div><div data-test-render-count="3"><div class="mb-1 mt-6 group"><div class="flex flex-col items-end gap-1"><div class="group relative inline-flex gap-2 bg-bg-300 rounded-xl"><div class="flex flex-row gap-2 relative"><div class="flex-1"><div data-testid="user-message" class="font-large !font-user-message grid grid-cols-1 gap-2 py-0.5 relative"><p class="whitespace-pre-wrap break-words">Thanks! Can you show me a numbered list?</p></div></div></div></div></div></div></div><div data-test-render-count="4"><div class="group" style="height: auto; opacity: 1; transform: none"><div data-is-streaming="false" class="group relative relative pb-3"><div class="font-claude-response relative leading-[1.65rem]"><div class="standard-markdown grid-cols-1 grid gap-4"><p>Here's a numbered list:</p><ol class="list-decimal space-y-2.5 pl-7"><li class="whitespace-normal break-words">First step</li><li class="whitespace-normal break-words">Second step</li><li class="whitespace-normal break-words">Third step</li></ol></div></div></div></div></div></main>
+}</code></pre>
+                        <h3>A List</h3>
+                        <ul>
+                          <li>First item</li>
+                          <li>Second item with <strong>bold</strong></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-start opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition" role="group" aria-label="Message actions">
+        <div class="text-text-300">
+          <div class="text-text-300 flex items-stretch justify-between">
+            <div class="w-fit" data-state="closed"><button type="button" data-testid="action-bar-copy" aria-label="Copy"></button></div>
+            <div class="w-fit" data-state="closed"><button type="button" data-testid="action-bar-retry" aria-label="Retry"></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div data-test-render-count="1">
+    <div class="mb-1 mt-6 group">
+      <div class="flex flex-col items-end gap-1">
+        <div class="group relative inline-flex gap-2 bg-bg-300 rounded-xl pl-2.5 py-2.5">
+          <div class="flex flex-row gap-2 relative">
+            <div class="flex-1">
+              <div data-testid="user-message" class="font-large !font-user-message grid grid-cols-1 gap-2 py-0.5 relative">
+                <p class="whitespace-pre-wrap break-words">Thanks! Can you show me a numbered list?</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-start opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition" role="group" aria-label="Message actions">
+          <div class="text-text-300">
+            <div class="text-text-300 flex items-stretch justify-between">
+              <span class="text-text-500 text-xs flex items-center mr-2" data-state="closed">Feb 14</span>
+              <div class="flex items-center">
+                <div class="w-fit" data-state="closed"><button type="button" aria-label="Copy"></button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div data-test-render-count="1">
+    <div class="group" style="height: auto; opacity: 1; transform: none;">
+      <div class="contents">
+        <div data-is-streaming="false" class="group relative relative pb-3" style="opacity: 1; transform: none;">
+          <div class="font-claude-response relative leading-[1.65rem]">
+            <div>
+              <div class="grid grid-rows-[auto_auto] min-w-0">
+                <div class="row-start-1 col-start-1 min-w-0">
+                  <div class="min-w-0 pl-2 py-1.5">
+                    <button class="group/status flex items-center gap-2 py-1 text-sm" aria-expanded="false">
+                      <div class="inline-flex items-center gap-1 min-w-0">
+                        <span class="truncate text-sm font-base">Prepared final response</span>
+                      </div>
+                    </button>
+                    <span class="sr-only" role="status" aria-live="polite">Prepared final response</span>
+                  </div>
+                </div>
+                <div class="row-start-2 col-start-1 relative grid isolate min-w-0">
+                  <div class="row-start-1 col-start-1 relative z-[2] min-w-0">
+                    <div>
+                      <div class="standard-markdown grid-cols-1 grid [&_>*]:min-w-0 gap-3 standard-markdown">
+                        <p>Here's a numbered list:</p>
+                        <ol>
+                          <li>First step</li>
+                          <li>Second step</li>
+                          <li>Third step</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-start opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition" role="group" aria-label="Message actions">
+        <div class="text-text-300">
+          <div class="text-text-300 flex items-stretch justify-between">
+            <div class="w-fit" data-state="closed"><button type="button" data-testid="action-bar-copy" aria-label="Copy"></button></div>
+            <div class="w-fit" data-state="closed"><button type="button" data-testid="action-bar-retry" aria-label="Retry"></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

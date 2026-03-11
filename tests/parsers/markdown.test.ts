@@ -37,6 +37,12 @@ describe('composeMarkdown', () => {
 		expect(result).toContain('Hi!');
 	});
 
+	test('includes per-message timestamp in label when provided', () => {
+		const messages: Message[] = [{ role: 'user', markdown: 'Hello there', timestamp: 'Feb 13' }];
+		const result = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+		expect(result).toContain('**User (Feb 13):**');
+	});
+
 	test('handles multiple messages', () => {
 		const messages: Message[] = [
 			{ role: 'user', markdown: 'Question' },

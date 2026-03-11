@@ -170,9 +170,10 @@ export function composeMarkdown(messages: Message[], title: string, platform: Pl
 
 	const separator = '='.repeat(100);
 
-	for (const { role, markdown } of messages) {
+	for (const { role, markdown, timestamp } of messages) {
 		const label = role === 'assistant' ? 'Assistant' : 'User';
-		lines.push(`**${label}:**`);
+		const timestampLabel = timestamp ? ` (${escapeMarkdown(timestamp)})` : '';
+		lines.push(`**${label}${timestampLabel}:**`);
 		lines.push(markdown || '_No content available._');
 		lines.push('');
 		lines.push(separator);

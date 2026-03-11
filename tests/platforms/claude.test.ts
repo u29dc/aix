@@ -125,6 +125,19 @@ describe('deriveClaudeTitle', () => {
 describe('extractClaudeConversation', () => {
 	let container: HTMLElement;
 
+	function wrapClaudeMessage(message: Element, timestamp?: string): HTMLDivElement {
+		const actionChildren: (Node | string)[] = [];
+		if (timestamp) {
+			actionChildren.push(createElement('span', { class: 'text-text-500 text-xs flex items-center mr-2', 'data-state': 'closed' }, [timestamp]));
+		}
+		actionChildren.push(createElement('div', { class: 'w-fit', 'data-state': 'closed' }, [createElement('button', { 'aria-label': 'Copy' })]));
+
+		return createElement('div', { 'data-test-render-count': '1' }, [
+			createElement('div', undefined, [message]),
+			createElement('div', { class: 'flex justify-start', role: 'group', 'aria-label': 'Message actions' }, [createElement('div', undefined, [createElement('div', undefined, actionChildren)])]),
+		]);
+	}
+
 	beforeEach(() => {
 		container = createElement('main');
 		document.body.appendChild(container);
@@ -246,5 +259,25 @@ describe('extractClaudeConversation', () => {
 		expect(messages).toHaveLength(1);
 
 		altContainer.remove();
+	});
+
+	test('extracts timestamp from action bar and applies it to following assistant message', () => {
+		container.appendChild(wrapClaudeMessage(createClaudeUserMessage('Question with date'), 'Feb 13'));
+		container.appendChild(wrapClaudeMessage(createClaudeAssistantMessage('Answer without visible date')));
+
+		const messages = extractClaudeConversation();
+		expect(messages).toHaveLength(2);
+		expect(messages[0]?.timestamp).toBe('Feb 13');
+		expect(messages[1]?.timestamp).toBe('Feb 13');
+	});
+
+	test('backfills timestamp for leading assistant messages when first visible date appears later', () => {
+		container.appendChild(wrapClaudeMessage(createClaudeAssistantMessage('Opening assistant message')));
+		container.appendChild(wrapClaudeMessage(createClaudeUserMessage('User message with date'), 'Feb 14'));
+
+		const messages = extractClaudeConversation();
+		expect(messages).toHaveLength(2);
+		expect(messages[0]?.timestamp).toBe('Feb 14');
+		expect(messages[1]?.timestamp).toBe('Feb 14');
 	});
 });

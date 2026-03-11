@@ -3,6 +3,7 @@ export type Platform = 'claude' | 'chatgpt';
 export interface Message {
 	role: 'user' | 'assistant';
 	markdown: string;
+	timestamp?: string;
 }
 
 export interface ConversionContext {
