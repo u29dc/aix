@@ -75,6 +75,7 @@ const MESSAGE_SELECTOR = `${USER_SELECTOR}, ${ASSISTANT_SELECTOR}`;
 const MARKDOWN_BLOCK_SELECTORS = ['.standard-markdown', '.standard-markdown_', '.progressive-markdown', '.progressive-markdown_', '.markdown', '.prose'].join(', ');
 const ARTIFACT_CARD_SELECTOR = '[aria-label="Preview contents"]';
 const FILE_THUMBNAIL_SELECTOR = '[data-testid="file-thumbnail"]';
+const MESSAGE_ACTIONS_SELECTOR = '[aria-label="Message actions"]';
 
 function isSystemMessage(node: Element): boolean {
 	return node.closest('[data-message-author-role="system"]') !== null;
@@ -82,6 +83,64 @@ function isSystemMessage(node: Element): boolean {
 
 function normalizeInlineText(value: string): string {
 	return value.replace(/\s+/g, ' ').trim();
+}
+
+function looksLikeTimestamp(value: string): boolean {
+	if (!value) return false;
+	return (
+		/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i.test(value) ||
+		/^\d{4}-\d{2}-\d{2}(?:[t\s]\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?(?:z|[+-]\d{2}:?\d{2})?)?$/i.test(value) ||
+		/\b\d{1,2}:\d{2}(?:\s?[ap]m)?\b/i.test(value) ||
+		/^(today|yesterday)$/i.test(value)
+	);
+}
+
+function extractMessageTimestamp(node: Element): string | undefined {
+	const wrapper = node.closest('[data-test-render-count]') ?? node.parentElement;
+	if (!wrapper) return undefined;
+
+	const actions = wrapper.querySelector(MESSAGE_ACTIONS_SELECTOR);
+	if (!actions) return undefined;
+
+	const dateTimeAttr = normalizeInlineText(actions.querySelector('time[datetime]')?.getAttribute('datetime') ?? '');
+	if (dateTimeAttr) return dateTimeAttr;
+
+	const timeText = normalizeInlineText(actions.querySelector('time')?.textContent ?? '');
+	if (looksLikeTimestamp(timeText)) return timeText;
+
+	const spans = Array.from(actions.querySelectorAll('span'));
+	for (const span of spans) {
+		const text = normalizeInlineText(span.textContent ?? '');
+		if (looksLikeTimestamp(text)) return text;
+	}
+
+	return undefined;
+}
+
+function fillMissingTimestamps(messages: Message[]): void {
+	let previousTimestamp: string | undefined;
+	for (const message of messages) {
+		if (message.timestamp) {
+			previousTimestamp = message.timestamp;
+			continue;
+		}
+		if (previousTimestamp) {
+			message.timestamp = previousTimestamp;
+		}
+	}
+
+	let nextTimestamp: string | undefined;
+	for (let index = messages.length - 1; index >= 0; index -= 1) {
+		const message = messages[index];
+		if (!message) continue;
+		if (message.timestamp) {
+			nextTimestamp = message.timestamp;
+			continue;
+		}
+		if (nextTimestamp) {
+			message.timestamp = nextTimestamp;
+		}
+	}
 }
 
 function uniqueStrings(values: string[]): string[] {
@@ -237,12 +296,20 @@ function processMessageCandidate(node: Element): Message | null {
 	const isUser = node.matches(USER_SELECTOR);
 	const role: 'user' | 'assistant' = isUser ? 'user' : 'assistant';
 	const markdown = isUser ? extractUserMarkdown(node) : extractAssistantMarkdown(node);
+	const timestamp = extractMessageTimestamp(node);
 
 	if (!markdown.trim()) {
 		if (isStreamingMessage(node)) {
+			if (timestamp) {
+				return { role, markdown: '> [Message is still streaming and was skipped]', timestamp };
+			}
 			return { role, markdown: '> [Message is still streaming and was skipped]' };
 		}
 		return null;
+	}
+
+	if (timestamp) {
+		return { role, markdown, timestamp };
 	}
 
 	return { role, markdown };
@@ -260,6 +327,8 @@ export function extractClaudeConversation(): Message[] {
 		const message = processMessageCandidate(node);
 		if (message) messages.push(message);
 	}
+
+	fillMissingTimestamps(messages);
 
 	return messages;
 }

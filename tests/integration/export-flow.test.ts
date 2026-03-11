@@ -280,6 +280,15 @@ describe('Claude Export Flow Integration', () => {
 
 				expect(hasUser).toBe(true);
 				expect(hasAssistant).toBe(true);
+
+				expect(messages[0]?.timestamp).toBe('Feb 13');
+				expect(messages[1]?.timestamp).toBe('Feb 13');
+				expect(messages[2]?.timestamp).toBe('Feb 14');
+				expect(messages[3]?.timestamp).toBe('Feb 14');
+
+				const markdown = composeMarkdown(messages, 'Fixture Chat', 'claude', 'Claude', 'https://claude.ai/chat/fixture');
+				expect(markdown).toContain('**User (Feb 13):**');
+				expect(markdown).toContain('**Assistant (Feb 14):**');
 			} finally {
 				main.remove();
 			}
