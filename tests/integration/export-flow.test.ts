@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { createClaudeAssistantMessage, createClaudeUserMessage, createElement, loadFixture, parseHTML } from '@tests/helpers';
+import {
+	createClaudeAssistantMessage,
+	createClaudeUserMessage,
+	createElement,
+	loadFixture,
+	parseHTML,
+} from '@tests/helpers';
 import { composeMarkdown } from '@/parsers/markdown';
 import { extractClaudeConversation } from '@/platforms/claude';
 
@@ -20,7 +26,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeUserMessage('Hello Claude!'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test Chat', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test Chat',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('# Test Chat');
 			expect(markdown).toContain('**User:**');
@@ -31,25 +43,43 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeAssistantMessage('Hello! How can I help you today?'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('**Assistant:**');
 			expect(markdown).toContain('Hello');
 		});
 
 		test('exports assistant message with multiple markdown sections', () => {
-			const thinking = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [createElement('p', undefined, ['Thinking block text'])]);
-			const answer = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [createElement('p', undefined, ['Final response text'])]);
+			const thinking = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+				createElement('p', undefined, ['Thinking block text']),
+			]);
+			const answer = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+				createElement('p', undefined, ['Final response text']),
+			]);
 			const content = createElement('div', undefined, [thinking, answer]);
 
 			container.appendChild(createClaudeAssistantMessage(content));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('Thinking block text');
 			expect(markdown).toContain('Final response text');
-			expect(markdown.indexOf('Thinking block text')).toBeLessThan(markdown.indexOf('Final response text'));
+			expect(markdown.indexOf('Thinking block text')).toBeLessThan(
+				markdown.indexOf('Final response text'),
+			);
 		});
 	});
 
@@ -61,7 +91,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeAssistantMessage('Second answer'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Multi-turn', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Multi-turn',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			const userMatches = markdown.match(/\*\*User:\*\*/g);
 			const assistantMatches = markdown.match(/\*\*Assistant:\*\*/g);
@@ -78,7 +114,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeAssistantMessage('Answer'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			const separator = '='.repeat(100);
 			expect(markdown).toContain(separator);
@@ -89,7 +131,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeAssistantMessage('Answer'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			const separator = '='.repeat(100);
 			expect(markdown.trimEnd().endsWith(separator)).toBe(false);
@@ -98,12 +146,22 @@ describe('Claude Export Flow Integration', () => {
 
 	describe('code block export', () => {
 		test('exports message with code block', () => {
-			const codeBlock = createElement('pre', undefined, [createElement('code', { class: 'language-typescript' }, ['const greeting = "hello";'])]);
-			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [codeBlock]);
+			const codeBlock = createElement('pre', undefined, [
+				createElement('code', { class: 'language-typescript' }, ['const greeting = "hello";']),
+			]);
+			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+				codeBlock,
+			]);
 			container.appendChild(createClaudeAssistantMessage(content));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Code Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Code Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('```typescript');
 			expect(markdown).toContain('const greeting = "hello";');
@@ -116,12 +174,22 @@ describe('Claude Export Flow Integration', () => {
     return 1;
   }
 }`;
-			const codeBlock = createElement('pre', undefined, [createElement('code', { class: 'language-javascript' }, [code])]);
-			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [codeBlock]);
+			const codeBlock = createElement('pre', undefined, [
+				createElement('code', { class: 'language-javascript' }, [code]),
+			]);
+			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+				codeBlock,
+			]);
 			container.appendChild(createClaudeAssistantMessage(content));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('  if (true) {');
 			expect(markdown).toContain('    return 1;');
@@ -135,11 +203,19 @@ describe('Claude Export Flow Integration', () => {
 				createElement('li', undefined, ['Second item']),
 				createElement('li', undefined, ['Third item']),
 			]);
-			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [list]);
+			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+				list,
+			]);
 			container.appendChild(createClaudeAssistantMessage(content));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'List Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'List Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('- First item');
 			expect(markdown).toContain('- Second item');
@@ -147,12 +223,23 @@ describe('Claude Export Flow Integration', () => {
 		});
 
 		test('exports ordered list', () => {
-			const list = createElement('ol', undefined, [createElement('li', undefined, ['Step one']), createElement('li', undefined, ['Step two'])]);
-			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [list]);
+			const list = createElement('ol', undefined, [
+				createElement('li', undefined, ['Step one']),
+				createElement('li', undefined, ['Step two']),
+			]);
+			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+				list,
+			]);
 			container.appendChild(createClaudeAssistantMessage(content));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('1. Step one');
 			expect(markdown).toContain('2. Step two');
@@ -162,15 +249,32 @@ describe('Claude Export Flow Integration', () => {
 	describe('table export', () => {
 		test('exports table with headers and rows', () => {
 			const table = createElement('table', undefined, [
-				createElement('tr', undefined, [createElement('th', undefined, ['Name']), createElement('th', undefined, ['Value'])]),
-				createElement('tr', undefined, [createElement('td', undefined, ['Alpha']), createElement('td', undefined, ['100'])]),
-				createElement('tr', undefined, [createElement('td', undefined, ['Beta']), createElement('td', undefined, ['200'])]),
+				createElement('tr', undefined, [
+					createElement('th', undefined, ['Name']),
+					createElement('th', undefined, ['Value']),
+				]),
+				createElement('tr', undefined, [
+					createElement('td', undefined, ['Alpha']),
+					createElement('td', undefined, ['100']),
+				]),
+				createElement('tr', undefined, [
+					createElement('td', undefined, ['Beta']),
+					createElement('td', undefined, ['200']),
+				]),
 			]);
-			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [table]);
+			const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+				table,
+			]);
 			container.appendChild(createClaudeAssistantMessage(content));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Table Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Table Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('| Name | Value |');
 			expect(markdown).toContain('| --- | --- |');
@@ -185,7 +289,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(streamingMsg);
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Streaming Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Streaming Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('streaming');
 			expect(markdown).toContain('skipped');
@@ -197,7 +307,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeUserMessage('Test'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'My Chat Title', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'My Chat Title',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown.startsWith('# My Chat Title\n')).toBe(true);
 		});
@@ -206,7 +322,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeUserMessage('Test'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('Exported from Claude');
 		});
@@ -225,7 +347,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeUserMessage('Test'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
 		});
@@ -234,7 +362,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeUserMessage('Test'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, 'Test', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Test',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown.endsWith('\n')).toBe(true);
 			expect(markdown.endsWith('\n\n')).toBe(false);
@@ -246,7 +380,13 @@ describe('Claude Export Flow Integration', () => {
 			const messages = extractClaudeConversation();
 			expect(messages).toHaveLength(0);
 
-			const markdown = composeMarkdown(messages, 'Empty', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'Empty',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 			expect(markdown).toContain('# Empty');
 		});
 
@@ -254,7 +394,13 @@ describe('Claude Export Flow Integration', () => {
 			container.appendChild(createClaudeUserMessage('Test'));
 
 			const messages = extractClaudeConversation();
-			const markdown = composeMarkdown(messages, '', 'claude', 'Claude', 'https://claude.ai/chat/123');
+			const markdown = composeMarkdown(
+				messages,
+				'',
+				'claude',
+				'Claude',
+				'https://claude.ai/chat/123',
+			);
 
 			expect(markdown).toContain('# AI Conversation');
 		});
@@ -286,7 +432,13 @@ describe('Claude Export Flow Integration', () => {
 				expect(messages[2]?.timestamp).toBe('Feb 14');
 				expect(messages[3]?.timestamp).toBe('Feb 14');
 
-				const markdown = composeMarkdown(messages, 'Fixture Chat', 'claude', 'Claude', 'https://claude.ai/chat/fixture');
+				const markdown = composeMarkdown(
+					messages,
+					'Fixture Chat',
+					'claude',
+					'Claude',
+					'https://claude.ai/chat/fixture',
+				);
 				expect(markdown).toContain('**User (Feb 13):**');
 				expect(markdown).toContain('**Assistant (Feb 14):**');
 			} finally {

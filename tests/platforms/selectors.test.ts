@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { createElement } from '@tests/helpers';
 import type { SelectorConfig } from '@/platforms/selectors';
-import { buildCombinedSelector, CLAUDE_SELECTORS, querySelector, querySelectorAll } from '@/platforms/selectors';
+import {
+	buildCombinedSelector,
+	CLAUDE_SELECTORS,
+	querySelector,
+	querySelectorAll,
+} from '@/platforms/selectors';
 
 describe('querySelector', () => {
 	let container: HTMLElement;

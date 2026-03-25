@@ -54,7 +54,9 @@ describe('formatList', () => {
 
 	describe('nested lists', () => {
 		test('indents nested unordered list with 2 spaces', () => {
-			const el = createList([{ text: 'Parent', children: [{ text: 'Child 1' }, { text: 'Child 2' }] }]);
+			const el = createList([
+				{ text: 'Parent', children: [{ text: 'Child 1' }, { text: 'Child 2' }] },
+			]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
 			expect(result).toContain('- Parent');
 			expect(result).toContain('  - Child 1');
@@ -96,21 +98,32 @@ describe('formatList', () => {
 
 	describe('list items with complex content', () => {
 		test('handles list item with inline formatting', () => {
-			const li = createElement('li', undefined, ['Text with ', createElement('strong', undefined, ['bold']), ' and ', createElement('em', undefined, ['italic'])]);
+			const li = createElement('li', undefined, [
+				'Text with ',
+				createElement('strong', undefined, ['bold']),
+				' and ',
+				createElement('em', undefined, ['italic']),
+			]);
 			const ul = createElement('ul', undefined, [li]);
 			const result = formatList(ul, defaultContext, false, convertNodeToMarkdown);
 			expect(result).toContain('- Text with **bold** and *italic*');
 		});
 
 		test('handles list item with inline code', () => {
-			const li = createElement('li', undefined, ['Use ', createElement('code', undefined, ['npm install'])]);
+			const li = createElement('li', undefined, [
+				'Use ',
+				createElement('code', undefined, ['npm install']),
+			]);
 			const ul = createElement('ul', undefined, [li]);
 			const result = formatList(ul, defaultContext, false, convertNodeToMarkdown);
 			expect(result).toContain('- Use `npm install`');
 		});
 
 		test('handles list item with link', () => {
-			const li = createElement('li', undefined, ['Visit ', createElement('a', { href: 'https://example.com' }, ['Example'])]);
+			const li = createElement('li', undefined, [
+				'Visit ',
+				createElement('a', { href: 'https://example.com' }, ['Example']),
+			]);
 			const ul = createElement('ul', undefined, [li]);
 			const result = formatList(ul, defaultContext, false, convertNodeToMarkdown);
 			expect(result).toContain('- Visit [Example](https://example.com)');
@@ -119,7 +132,10 @@ describe('formatList', () => {
 
 	describe('edge cases', () => {
 		test('ignores non-li children', () => {
-			const ul = createElement('ul', undefined, [createElement('div', undefined, ['Not a list item']), createElement('li', undefined, ['Real item'])]);
+			const ul = createElement('ul', undefined, [
+				createElement('div', undefined, ['Not a list item']),
+				createElement('li', undefined, ['Real item']),
+			]);
 			const result = formatList(ul, defaultContext, false, convertNodeToMarkdown);
 			expect(result).toBe('- Real item\n\n');
 		});

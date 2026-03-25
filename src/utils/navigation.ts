@@ -13,7 +13,9 @@ export function observeSpaNavigation(callback: () => void): void {
 		notify();
 	};
 
-	history.replaceState = function replaceStateProxy(...args: Parameters<typeof history.replaceState>): void {
+	history.replaceState = function replaceStateProxy(
+		...args: Parameters<typeof history.replaceState>
+	): void {
 		originalReplaceState.apply(this, args);
 		notify();
 	};

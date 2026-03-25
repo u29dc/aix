@@ -35,7 +35,10 @@ export const CLAUDE_SELECTORS = {
 	},
 	chatActions: {
 		primary: '[data-testid="chat-actions"]',
-		fallbacks: ['[data-testid="page-header"] [data-testid="chat-actions"]', '[class*="chat-actions"]'],
+		fallbacks: [
+			'[data-testid="page-header"] [data-testid="chat-actions"]',
+			'[class*="chat-actions"]',
+		],
 	},
 	chatTitle: {
 		primary: '[data-testid="chat-title-button"]',
@@ -57,11 +60,17 @@ export const CHATGPT_SELECTORS = {
 	},
 	userMessage: {
 		primary: '[data-message-author-role="user"]',
-		fallbacks: ['article[data-turn="user"] [data-message-author-role="user"]', '[data-turn="user"]'],
+		fallbacks: [
+			'article[data-turn="user"] [data-message-author-role="user"]',
+			'[data-turn="user"]',
+		],
 	},
 	assistantMessage: {
 		primary: '[data-message-author-role="assistant"]',
-		fallbacks: ['article[data-turn="assistant"] [data-message-author-role="assistant"]', '[data-turn="assistant"]'],
+		fallbacks: [
+			'article[data-turn="assistant"] [data-message-author-role="assistant"]',
+			'[data-turn="assistant"]',
+		],
 	},
 	messageContent: {
 		primary: '.markdown',

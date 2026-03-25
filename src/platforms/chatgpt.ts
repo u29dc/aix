@@ -1,7 +1,12 @@
 import { BUTTON_ID, CHATGPT_BUTTON_CLASS_FALLBACK, SANITIZE_SELECTORS } from '@/constants';
 import { convertNodeToMarkdown } from '@/parsers';
 import { sanitizeElement } from '@/parsers/sanitizer';
-import { buildCombinedSelector, CHATGPT_SELECTORS, querySelector, querySelectorAll } from '@/platforms/selectors';
+import {
+	buildCombinedSelector,
+	CHATGPT_SELECTORS,
+	querySelector,
+	querySelectorAll,
+} from '@/platforms/selectors';
 import type { PlatformConfig } from '@/platforms/types';
 import type { Message } from '@/types';
 import { createButton } from '@/ui/button';
@@ -10,7 +15,9 @@ import { escapeMarkdown } from '@/utils/markdown';
 const CHATGPT_HOST_REGEX = /(^|\.)chatgpt\.com$/i;
 const OPENAI_CHAT_HOST_REGEX = /(^|\.)chat\.openai\.com$/i;
 
-const CHATGPT_SANITIZE_SELECTORS = SANITIZE_SELECTORS.filter((selector) => selector !== 'input' && selector !== '[role="img"]');
+const CHATGPT_SANITIZE_SELECTORS = SANITIZE_SELECTORS.filter(
+	(selector) => selector !== 'input' && selector !== '[role="img"]',
+);
 
 const TURN_SELECTOR = buildCombinedSelector(CHATGPT_SELECTORS.conversationTurn);
 const USER_SELECTOR = buildCombinedSelector(CHATGPT_SELECTORS.userMessage);
@@ -71,7 +78,9 @@ function uniqueStrings(values: string[]): string[] {
 }
 
 function selectInnermost(elements: Element[]): Element[] {
-	return elements.filter((element) => !elements.some((other) => other !== element && element.contains(other)));
+	return elements.filter(
+		(element) => !elements.some((other) => other !== element && element.contains(other)),
+	);
 }
 
 function formatListSection(label: string, entries: string[]): string {
@@ -103,9 +112,13 @@ function extractFileCards(root: Element): string[] {
 	const entries: string[] = [];
 
 	for (const link of links) {
-		const name = normalizeInlineText(link.querySelector('.truncate.font-semibold')?.textContent ?? '');
+		const name = normalizeInlineText(
+			link.querySelector('.truncate.font-semibold')?.textContent ?? '',
+		);
 		if (!name) continue;
-		const type = normalizeInlineText(link.querySelector('.text-token-text-secondary.truncate')?.textContent ?? '');
+		const type = normalizeInlineText(
+			link.querySelector('.text-token-text-secondary.truncate')?.textContent ?? '',
+		);
 		if (type) {
 			entries.push(`${escapeMarkdown(name)} (${escapeMarkdown(type)})`);
 		} else {

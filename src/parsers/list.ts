@@ -4,7 +4,12 @@ import type { ConversionContext } from '@/types';
 /**
  * Format a list element (ul/ol) as markdown
  */
-export function formatList(listElement: Element, context: ConversionContext, ordered: boolean, convertNode: ConvertNodeFn): string {
+export function formatList(
+	listElement: Element,
+	context: ConversionContext,
+	ordered: boolean,
+	convertNode: ConvertNodeFn,
+): string {
 	const depth = context.listDepth;
 	const indent = '  '.repeat(depth);
 	const items: string[] = [];

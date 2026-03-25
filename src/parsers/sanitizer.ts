@@ -80,6 +80,8 @@ export function isEmptyElement(element: Element): boolean {
 	const text = element.textContent?.trim() ?? '';
 	if (text) return false;
 
-	const hasVisibleChildren = element.querySelector('img, video, audio, iframe, canvas, object, embed');
+	const hasVisibleChildren = element.querySelector(
+		'img, video, audio, iframe, canvas, object, embed',
+	);
 	return !hasVisibleChildren;
 }

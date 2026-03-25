@@ -86,8 +86,14 @@ describe('formatTable', () => {
 
 	describe('inline formatting in cells', () => {
 		test('handles bold text in cells', () => {
-			const headerRow = createElement('tr', undefined, [createElement('th', undefined, ['Feature']), createElement('th', undefined, ['Status'])]);
-			const bodyRow = createElement('tr', undefined, [createElement('td', undefined, [createElement('strong', undefined, ['Important'])]), createElement('td', undefined, ['Done'])]);
+			const headerRow = createElement('tr', undefined, [
+				createElement('th', undefined, ['Feature']),
+				createElement('th', undefined, ['Status']),
+			]);
+			const bodyRow = createElement('tr', undefined, [
+				createElement('td', undefined, [createElement('strong', undefined, ['Important'])]),
+				createElement('td', undefined, ['Done']),
+			]);
 			const table = createElement('table', undefined, [headerRow, bodyRow]);
 			const result = formatTable(table, convertNodeToMarkdown);
 			expect(result).toContain('| **Important** | Done |');
@@ -95,23 +101,35 @@ describe('formatTable', () => {
 
 		test('handles italic text in cells', () => {
 			const headerRow = createElement('tr', undefined, [createElement('th', undefined, ['Note'])]);
-			const bodyRow = createElement('tr', undefined, [createElement('td', undefined, [createElement('em', undefined, ['emphasis'])])]);
+			const bodyRow = createElement('tr', undefined, [
+				createElement('td', undefined, [createElement('em', undefined, ['emphasis'])]),
+			]);
 			const table = createElement('table', undefined, [headerRow, bodyRow]);
 			const result = formatTable(table, convertNodeToMarkdown);
 			expect(result).toContain('| *emphasis* |');
 		});
 
 		test('handles inline code in cells', () => {
-			const headerRow = createElement('tr', undefined, [createElement('th', undefined, ['Command'])]);
-			const bodyRow = createElement('tr', undefined, [createElement('td', undefined, [createElement('code', undefined, ['npm install'])])]);
+			const headerRow = createElement('tr', undefined, [
+				createElement('th', undefined, ['Command']),
+			]);
+			const bodyRow = createElement('tr', undefined, [
+				createElement('td', undefined, [createElement('code', undefined, ['npm install'])]),
+			]);
 			const table = createElement('table', undefined, [headerRow, bodyRow]);
 			const result = formatTable(table, convertNodeToMarkdown);
 			expect(result).toContain('| `npm install` |');
 		});
 
 		test('handles links in cells', () => {
-			const headerRow = createElement('tr', undefined, [createElement('th', undefined, ['Resource'])]);
-			const bodyRow = createElement('tr', undefined, [createElement('td', undefined, [createElement('a', { href: 'https://example.com' }, ['Link'])])]);
+			const headerRow = createElement('tr', undefined, [
+				createElement('th', undefined, ['Resource']),
+			]);
+			const bodyRow = createElement('tr', undefined, [
+				createElement('td', undefined, [
+					createElement('a', { href: 'https://example.com' }, ['Link']),
+				]),
+			]);
 			const table = createElement('table', undefined, [headerRow, bodyRow]);
 			const result = formatTable(table, convertNodeToMarkdown);
 			expect(result).toContain('| [Link](https://example.com) |');
@@ -120,8 +138,12 @@ describe('formatTable', () => {
 
 	describe('whitespace handling', () => {
 		test('trims cell content', () => {
-			const headerRow = createElement('tr', undefined, [createElement('th', undefined, ['  Header  '])]);
-			const bodyRow = createElement('tr', undefined, [createElement('td', undefined, ['  Value  '])]);
+			const headerRow = createElement('tr', undefined, [
+				createElement('th', undefined, ['  Header  ']),
+			]);
+			const bodyRow = createElement('tr', undefined, [
+				createElement('td', undefined, ['  Value  ']),
+			]);
 			const table = createElement('table', undefined, [headerRow, bodyRow]);
 			const result = formatTable(table, convertNodeToMarkdown);
 			expect(result).toContain('| Header |');
@@ -129,16 +151,26 @@ describe('formatTable', () => {
 		});
 
 		test('uses single space for empty header cells', () => {
-			const headerRow = createElement('tr', undefined, [createElement('th', undefined, ['']), createElement('th', undefined, ['Data'])]);
-			const bodyRow = createElement('tr', undefined, [createElement('td', undefined, ['A']), createElement('td', undefined, ['B'])]);
+			const headerRow = createElement('tr', undefined, [
+				createElement('th', undefined, ['']),
+				createElement('th', undefined, ['Data']),
+			]);
+			const bodyRow = createElement('tr', undefined, [
+				createElement('td', undefined, ['A']),
+				createElement('td', undefined, ['B']),
+			]);
 			const table = createElement('table', undefined, [headerRow, bodyRow]);
 			const result = formatTable(table, convertNodeToMarkdown);
 			expect(result).toContain('|   | Data |');
 		});
 
 		test('escapes pipes and newlines in cells', () => {
-			const headerRow = createElement('tr', undefined, [createElement('th', undefined, ['Name | Type'])]);
-			const bodyRow = createElement('tr', undefined, [createElement('td', undefined, ['Line 1\nLine 2'])]);
+			const headerRow = createElement('tr', undefined, [
+				createElement('th', undefined, ['Name | Type']),
+			]);
+			const bodyRow = createElement('tr', undefined, [
+				createElement('td', undefined, ['Line 1\nLine 2']),
+			]);
 			const table = createElement('table', undefined, [headerRow, bodyRow]);
 			const result = formatTable(table, convertNodeToMarkdown);
 			expect(result).toContain('Name \\| Type');

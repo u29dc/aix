@@ -64,14 +64,18 @@ function formatInlineCode(element: Element): string {
 function formatCheckboxInput(element: Element): string {
 	const type = element.getAttribute('type')?.toLowerCase();
 	if (type !== 'checkbox') return '';
-	const checked = element.hasAttribute('checked') || element.getAttribute('aria-checked') === 'true';
+	const checked =
+		element.hasAttribute('checked') || element.getAttribute('aria-checked') === 'true';
 	return checked ? '[x] ' : '[ ] ';
 }
 
 /**
  * Convert a DOM node to markdown
  */
-export function convertNodeToMarkdown(node: Node, context: ConversionContext = DEFAULT_CONTEXT): string {
+export function convertNodeToMarkdown(
+	node: Node,
+	context: ConversionContext = DEFAULT_CONTEXT,
+): string {
 	if (!node) return '';
 	if (node.nodeType === Node.TEXT_NODE) return escapeMarkdown(node.nodeValue ?? '');
 	if (node.nodeType !== Node.ELEMENT_NODE) return '';
@@ -157,7 +161,13 @@ export function collectChildrenMarkdown(element: Element, context: ConversionCon
 /**
  * Compose a full markdown document from messages
  */
-export function composeMarkdown(messages: Message[], title: string, platform: Platform, platformLabel: string, url: string): string {
+export function composeMarkdown(
+	messages: Message[],
+	title: string,
+	platform: Platform,
+	platformLabel: string,
+	url: string,
+): string {
 	const timestamp = new Date().toISOString();
 	const platformName = platformLabel || platform;
 

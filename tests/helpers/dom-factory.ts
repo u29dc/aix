@@ -13,7 +13,11 @@ export function createDocument(html: string): Document {
 /**
  * Create an element with attributes and children
  */
-export function createElement<K extends keyof HTMLElementTagNameMap>(tag: K, attrs?: Record<string, string>, children?: (Node | string)[]): HTMLElementTagNameMap[K] {
+export function createElement<K extends keyof HTMLElementTagNameMap>(
+	tag: K,
+	attrs?: Record<string, string>,
+	children?: (Node | string)[],
+): HTMLElementTagNameMap[K] {
 	const element = document.createElement(tag);
 
 	if (attrs) {
@@ -39,7 +43,11 @@ export function createElement<K extends keyof HTMLElementTagNameMap>(tag: K, att
  * Create a code block element
  */
 export function createCodeBlock(code: string, language?: string): HTMLPreElement {
-	const codeElement = createElement('code', language ? { class: `language-${language}` } : undefined, [code]);
+	const codeElement = createElement(
+		'code',
+		language ? { class: `language-${language}` } : undefined,
+		[code],
+	);
 	return createElement('pre', undefined, [codeElement]);
 }
 
@@ -55,9 +63,14 @@ export interface NestedItem {
 /**
  * Create a list element (ul or ol)
  */
-export function createList(items: (string | NestedItem)[], ordered = false, start?: number): HTMLUListElement | HTMLOListElement {
+export function createList(
+	items: (string | NestedItem)[],
+	ordered = false,
+	start?: number,
+): HTMLUListElement | HTMLOListElement {
 	const tag = ordered ? 'ol' : 'ul';
-	const attrs: Record<string, string> | undefined = ordered && start !== undefined && start !== 1 ? { start: String(start) } : undefined;
+	const attrs: Record<string, string> | undefined =
+		ordered && start !== undefined && start !== 1 ? { start: String(start) } : undefined;
 
 	const listItems = items.map((item) => {
 		if (typeof item === 'string') {
@@ -99,18 +112,35 @@ export function createTable(headers: string[], rows: string[][]): HTMLTableEleme
  * Create a Claude-style user message container
  */
 export function createClaudeUserMessage(content: string | Element): HTMLDivElement {
-	const contentElement = typeof content === 'string' ? createElement('p', { class: 'whitespace-pre-wrap break-words' }, [content]) : content;
+	const contentElement =
+		typeof content === 'string'
+			? createElement('p', { class: 'whitespace-pre-wrap break-words' }, [content])
+			: content;
 
-	return createElement('div', { 'data-testid': 'user-message', class: 'font-large !font-user-message' }, [contentElement]);
+	return createElement(
+		'div',
+		{ 'data-testid': 'user-message', class: 'font-large !font-user-message' },
+		[contentElement],
+	);
 }
 
 /**
  * Create a Claude-style assistant message container
  */
-export function createClaudeAssistantMessage(content: string | Element, streaming = false): HTMLDivElement {
-	const contentElement = typeof content === 'string' ? createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [createElement('p', undefined, [content])]) : content;
+export function createClaudeAssistantMessage(
+	content: string | Element,
+	streaming = false,
+): HTMLDivElement {
+	const contentElement =
+		typeof content === 'string'
+			? createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+					createElement('p', undefined, [content]),
+				])
+			: content;
 
 	const responseDiv = createElement('div', { class: 'font-claude-response' }, [contentElement]);
 
-	return createElement('div', { 'data-is-streaming': String(streaming), class: 'group relative' }, [responseDiv]);
+	return createElement('div', { 'data-is-streaming': String(streaming), class: 'group relative' }, [
+		responseDiv,
+	]);
 }

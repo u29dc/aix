@@ -272,7 +272,9 @@ describe('convertNodeToMarkdown', () => {
 		});
 
 		test('skips elements with contenteditable presentation', () => {
-			const el = createElement('div', { contenteditable: 'false', role: 'presentation' }, ['Decorative']);
+			const el = createElement('div', { contenteditable: 'false', role: 'presentation' }, [
+				'Decorative',
+			]);
 			expect(convertNodeToMarkdown(el)).toBe('');
 		});
 	});

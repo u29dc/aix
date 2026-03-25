@@ -1,6 +1,14 @@
 import { describe, expect, test } from 'bun:test';
 
-import { detectLanguage, escapeMarkdown, normalizeMarkdown, normalizeSpacing, pickFence, wrapInlineCode, wrapMarkdown } from '@/utils/markdown';
+import {
+	detectLanguage,
+	escapeMarkdown,
+	normalizeMarkdown,
+	normalizeSpacing,
+	pickFence,
+	wrapInlineCode,
+	wrapMarkdown,
+} from '@/utils/markdown';
 
 describe('escapeMarkdown', () => {
 	test('returns empty string for empty input', () => {
@@ -104,7 +112,9 @@ describe('normalizeSpacing', () => {
 describe('normalizeMarkdown', () => {
 	test('preserves fenced code block whitespace', () => {
 		const input = ['```', 'line 1', '', 'line 3', '```', '', '', 'after'].join('\n');
-		expect(normalizeMarkdown(input)).toBe(['```', 'line 1', '', 'line 3', '```', '', 'after'].join('\n'));
+		expect(normalizeMarkdown(input)).toBe(
+			['```', 'line 1', '', 'line 3', '```', '', 'after'].join('\n'),
+		);
 	});
 
 	test('collapses extra blank lines outside code blocks', () => {

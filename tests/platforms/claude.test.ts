@@ -1,6 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { createClaudeAssistantMessage, createClaudeUserMessage, createElement } from '@tests/helpers';
-import { deriveClaudeTitle, extractClaudeConversation, isEligibleClaudeConversation } from '@/platforms/claude';
+import {
+	createClaudeAssistantMessage,
+	createClaudeUserMessage,
+	createElement,
+} from '@tests/helpers';
+import {
+	deriveClaudeTitle,
+	extractClaudeConversation,
+	isEligibleClaudeConversation,
+} from '@/platforms/claude';
 
 describe('isEligibleClaudeConversation', () => {
 	const originalLocation = window.location;
@@ -90,13 +98,17 @@ describe('deriveClaudeTitle', () => {
 	});
 
 	test('extracts title from chat-title-button', () => {
-		const titleButton = createElement('button', { 'data-testid': 'chat-title-button' }, ['My Conversation']);
+		const titleButton = createElement('button', { 'data-testid': 'chat-title-button' }, [
+			'My Conversation',
+		]);
 		document.body.appendChild(titleButton);
 		expect(deriveClaudeTitle()).toBe('My Conversation');
 	});
 
 	test('trims whitespace from title button', () => {
-		const titleButton = createElement('button', { 'data-testid': 'chat-title-button' }, ['  Spaced Title  ']);
+		const titleButton = createElement('button', { 'data-testid': 'chat-title-button' }, [
+			'  Spaced Title  ',
+		]);
 		document.body.appendChild(titleButton);
 		expect(deriveClaudeTitle()).toBe('Spaced Title');
 	});
@@ -128,13 +140,27 @@ describe('extractClaudeConversation', () => {
 	function wrapClaudeMessage(message: Element, timestamp?: string): HTMLDivElement {
 		const actionChildren: (Node | string)[] = [];
 		if (timestamp) {
-			actionChildren.push(createElement('span', { class: 'text-text-500 text-xs flex items-center mr-2', 'data-state': 'closed' }, [timestamp]));
+			actionChildren.push(
+				createElement(
+					'span',
+					{ class: 'text-text-500 text-xs flex items-center mr-2', 'data-state': 'closed' },
+					[timestamp],
+				),
+			);
 		}
-		actionChildren.push(createElement('div', { class: 'w-fit', 'data-state': 'closed' }, [createElement('button', { 'aria-label': 'Copy' })]));
+		actionChildren.push(
+			createElement('div', { class: 'w-fit', 'data-state': 'closed' }, [
+				createElement('button', { 'aria-label': 'Copy' }),
+			]),
+		);
 
 		return createElement('div', { 'data-test-render-count': '1' }, [
 			createElement('div', undefined, [message]),
-			createElement('div', { class: 'flex justify-start', role: 'group', 'aria-label': 'Message actions' }, [createElement('div', undefined, [createElement('div', undefined, actionChildren)])]),
+			createElement(
+				'div',
+				{ class: 'flex justify-start', role: 'group', 'aria-label': 'Message actions' },
+				[createElement('div', undefined, [createElement('div', undefined, actionChildren)])],
+			),
 		]);
 	}
 
@@ -214,7 +240,12 @@ describe('extractClaudeConversation', () => {
 
 	test('extracts message with inline formatting', () => {
 		const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
-			createElement('p', undefined, ['Text with ', createElement('strong', undefined, ['bold']), ' and ', createElement('code', undefined, ['code'])]),
+			createElement('p', undefined, [
+				'Text with ',
+				createElement('strong', undefined, ['bold']),
+				' and ',
+				createElement('code', undefined, ['code']),
+			]),
 		]);
 		const assistantMsg = createClaudeAssistantMessage(content);
 		container.appendChild(assistantMsg);
@@ -227,7 +258,9 @@ describe('extractClaudeConversation', () => {
 
 	test('skips hidden elements inside message content', () => {
 		const hidden = createElement('span', { style: 'display: none' }, ['Secret']);
-		const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [createElement('p', undefined, ['Visible ', hidden])]);
+		const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+			createElement('p', undefined, ['Visible ', hidden]),
+		]);
 		const assistantMsg = createClaudeAssistantMessage(content);
 		container.appendChild(assistantMsg);
 
@@ -238,8 +271,12 @@ describe('extractClaudeConversation', () => {
 	});
 
 	test('extracts message with code block', () => {
-		const codeBlock = createElement('pre', undefined, [createElement('code', { class: 'language-javascript' }, ['const x = 1;'])]);
-		const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [codeBlock]);
+		const codeBlock = createElement('pre', undefined, [
+			createElement('code', { class: 'language-javascript' }, ['const x = 1;']),
+		]);
+		const content = createElement('div', { class: 'standard-markdown grid-cols-1 grid gap-4' }, [
+			codeBlock,
+		]);
 		const assistantMsg = createClaudeAssistantMessage(content);
 		container.appendChild(assistantMsg);
 
@@ -262,8 +299,12 @@ describe('extractClaudeConversation', () => {
 	});
 
 	test('extracts timestamp from action bar and applies it to following assistant message', () => {
-		container.appendChild(wrapClaudeMessage(createClaudeUserMessage('Question with date'), 'Feb 13'));
-		container.appendChild(wrapClaudeMessage(createClaudeAssistantMessage('Answer without visible date')));
+		container.appendChild(
+			wrapClaudeMessage(createClaudeUserMessage('Question with date'), 'Feb 13'),
+		);
+		container.appendChild(
+			wrapClaudeMessage(createClaudeAssistantMessage('Answer without visible date')),
+		);
 
 		const messages = extractClaudeConversation();
 		expect(messages).toHaveLength(2);
@@ -272,8 +313,12 @@ describe('extractClaudeConversation', () => {
 	});
 
 	test('backfills timestamp for leading assistant messages when first visible date appears later', () => {
-		container.appendChild(wrapClaudeMessage(createClaudeAssistantMessage('Opening assistant message')));
-		container.appendChild(wrapClaudeMessage(createClaudeUserMessage('User message with date'), 'Feb 14'));
+		container.appendChild(
+			wrapClaudeMessage(createClaudeAssistantMessage('Opening assistant message')),
+		);
+		container.appendChild(
+			wrapClaudeMessage(createClaudeUserMessage('User message with date'), 'Feb 14'),
+		);
 
 		const messages = extractClaudeConversation();
 		expect(messages).toHaveLength(2);

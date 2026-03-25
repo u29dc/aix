@@ -1,10 +1,18 @@
 import { describe, expect, test } from 'bun:test';
 import { createElement } from '@tests/helpers';
-import { DEFAULT_REMOVE_SELECTORS, isEmptyElement, normalizeWhitespace, sanitizeElement } from '@/parsers/sanitizer';
+import {
+	DEFAULT_REMOVE_SELECTORS,
+	isEmptyElement,
+	normalizeWhitespace,
+	sanitizeElement,
+} from '@/parsers/sanitizer';
 
 describe('sanitizeElement', () => {
 	test('removes script elements', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Content']), createElement('script', undefined, ['alert("test")'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Content']),
+			createElement('script', undefined, ['alert("test")']),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.querySelector('script')).toBeNull();
@@ -12,7 +20,10 @@ describe('sanitizeElement', () => {
 	});
 
 	test('removes style elements', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Content']), createElement('style', undefined, ['.test { color: red; }'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Content']),
+			createElement('style', undefined, ['.test { color: red; }']),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.querySelector('style')).toBeNull();
@@ -28,21 +39,30 @@ describe('sanitizeElement', () => {
 	});
 
 	test('removes button elements', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Content']), createElement('button', undefined, ['Click me'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Content']),
+			createElement('button', undefined, ['Click me']),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.querySelector('button')).toBeNull();
 	});
 
 	test('removes input elements', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Content']), createElement('input', { type: 'text' })]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Content']),
+			createElement('input', { type: 'text' }),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.querySelector('input')).toBeNull();
 	});
 
 	test('removes elements with aria-hidden', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Visible']), createElement('span', { 'aria-hidden': 'true' }, ['Hidden'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Visible']),
+			createElement('span', { 'aria-hidden': 'true' }, ['Hidden']),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.querySelector('[aria-hidden="true"]')).toBeNull();
@@ -51,28 +71,40 @@ describe('sanitizeElement', () => {
 	});
 
 	test('removes copy button elements', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Content']), createElement('button', { class: 'copy-button' }, ['Copy'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Content']),
+			createElement('button', { class: 'copy-button' }, ['Copy']),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.querySelector('.copy-button')).toBeNull();
 	});
 
 	test('removes elements with testid containing copy', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Content']), createElement('button', { 'data-testid': 'action-bar-copy' }, ['Copy'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Content']),
+			createElement('button', { 'data-testid': 'action-bar-copy' }, ['Copy']),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.querySelector('[data-testid*="copy"]')).toBeNull();
 	});
 
 	test('removes sr-only elements', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Visible']), createElement('span', { class: 'sr-only' }, ['Screen reader only'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Visible']),
+			createElement('span', { class: 'sr-only' }, ['Screen reader only']),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.querySelector('.sr-only')).toBeNull();
 	});
 
 	test('preserves text content', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Important text']), createElement('button', undefined, ['Remove me'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Important text']),
+			createElement('button', undefined, ['Remove me']),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.textContent).toContain('Important text');
@@ -94,14 +126,20 @@ describe('sanitizeElement', () => {
 	});
 
 	test('does not modify original element', () => {
-		const container = createElement('div', undefined, [createElement('p', undefined, ['Content']), createElement('button', undefined, ['Button'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', undefined, ['Content']),
+			createElement('button', undefined, ['Button']),
+		]);
 
 		sanitizeElement(container);
 		expect(container.querySelector('button')).not.toBeNull();
 	});
 
 	test('accepts custom remove selectors', () => {
-		const container = createElement('div', undefined, [createElement('p', { class: 'keep' }, ['Keep']), createElement('p', { class: 'remove-me' }, ['Remove'])]);
+		const container = createElement('div', undefined, [
+			createElement('p', { class: 'keep' }, ['Keep']),
+			createElement('p', { class: 'remove-me' }, ['Remove']),
+		]);
 
 		const result = sanitizeElement(container, { removeSelectors: ['.remove-me'] });
 		expect(result.querySelector('.keep')).not.toBeNull();
@@ -109,7 +147,9 @@ describe('sanitizeElement', () => {
 	});
 
 	test('removes nested unwanted elements', () => {
-		const container = createElement('div', undefined, [createElement('div', undefined, [createElement('button', undefined, ['Nested button'])])]);
+		const container = createElement('div', undefined, [
+			createElement('div', undefined, [createElement('button', undefined, ['Nested button'])]),
+		]);
 
 		const result = sanitizeElement(container);
 		expect(result.querySelector('button')).toBeNull();
