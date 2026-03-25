@@ -38,7 +38,6 @@ export function ensureClaudeButton(): boolean {
 		box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
 	`;
 	document.body.appendChild(button);
-	// biome-ignore lint/suspicious/noConsole: debug logging
 	console.log('[AIX] Button injected as fixed overlay');
 	return true;
 }
@@ -72,7 +71,14 @@ function isStreamingMessage(node: Element): boolean {
 const USER_SELECTOR = buildCombinedSelector(CLAUDE_SELECTORS.userMessage);
 const ASSISTANT_SELECTOR = buildCombinedSelector(CLAUDE_SELECTORS.assistantMessage);
 const MESSAGE_SELECTOR = `${USER_SELECTOR}, ${ASSISTANT_SELECTOR}`;
-const MARKDOWN_BLOCK_SELECTORS = ['.standard-markdown', '.standard-markdown_', '.progressive-markdown', '.progressive-markdown_', '.markdown', '.prose'].join(', ');
+const MARKDOWN_BLOCK_SELECTORS = [
+	'.standard-markdown',
+	'.standard-markdown_',
+	'.progressive-markdown',
+	'.progressive-markdown_',
+	'.markdown',
+	'.prose',
+].join(', ');
 const ARTIFACT_CARD_SELECTOR = '[aria-label="Preview contents"]';
 const FILE_THUMBNAIL_SELECTOR = '[data-testid="file-thumbnail"]';
 const MESSAGE_ACTIONS_SELECTOR = '[aria-label="Message actions"]';
@@ -89,7 +95,9 @@ function looksLikeTimestamp(value: string): boolean {
 	if (!value) return false;
 	return (
 		/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i.test(value) ||
-		/^\d{4}-\d{2}-\d{2}(?:[t\s]\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?(?:z|[+-]\d{2}:?\d{2})?)?$/i.test(value) ||
+		/^\d{4}-\d{2}-\d{2}(?:[t\s]\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?(?:z|[+-]\d{2}:?\d{2})?)?$/i.test(
+			value,
+		) ||
 		/\b\d{1,2}:\d{2}(?:\s?[ap]m)?\b/i.test(value) ||
 		/^(today|yesterday)$/i.test(value)
 	);
@@ -102,7 +110,9 @@ function extractMessageTimestamp(node: Element): string | undefined {
 	const actions = wrapper.querySelector(MESSAGE_ACTIONS_SELECTOR);
 	if (!actions) return undefined;
 
-	const dateTimeAttr = normalizeInlineText(actions.querySelector('time[datetime]')?.getAttribute('datetime') ?? '');
+	const dateTimeAttr = normalizeInlineText(
+		actions.querySelector('time[datetime]')?.getAttribute('datetime') ?? '',
+	);
 	if (dateTimeAttr) return dateTimeAttr;
 
 	const timeText = normalizeInlineText(actions.querySelector('time')?.textContent ?? '');
@@ -156,13 +166,19 @@ function uniqueStrings(values: string[]): string[] {
 }
 
 function selectInnermost(elements: Element[]): Element[] {
-	return elements.filter((element) => !elements.some((other) => other !== element && element.contains(other)));
+	return elements.filter(
+		(element) => !elements.some((other) => other !== element && element.contains(other)),
+	);
 }
 
 function collectMarkdownBlocks(node: Element): Element[] {
 	const blocks = Array.from(node.querySelectorAll(MARKDOWN_BLOCK_SELECTORS));
 	if (blocks.length === 0) return [];
-	const standardBlocks = blocks.filter((block) => block.classList.contains('standard-markdown') || block.classList.contains('standard-markdown_'));
+	const standardBlocks = blocks.filter(
+		(block) =>
+			block.classList.contains('standard-markdown') ||
+			block.classList.contains('standard-markdown_'),
+	);
 	const preferred = standardBlocks.length > 0 ? standardBlocks : blocks;
 	return selectInnermost(preferred);
 }
@@ -320,7 +336,9 @@ function processMessageCandidate(node: Element): Message | null {
  */
 export function extractClaudeConversation(): Message[] {
 	const root = findChatRoot();
-	const candidates = Array.from(root.querySelectorAll(MESSAGE_SELECTOR)).filter((node) => node.parentElement?.closest(MESSAGE_SELECTOR) === null);
+	const candidates = Array.from(root.querySelectorAll(MESSAGE_SELECTOR)).filter(
+		(node) => node.parentElement?.closest(MESSAGE_SELECTOR) === null,
+	);
 	const messages: Message[] = [];
 
 	for (const node of candidates) {

@@ -1,4 +1,14 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
-	"extends": [".config/biome/biome.json"]
+	"formatter": {
+		"indentStyle": "tab",
+		"lineWidth": 100
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "always",
+			"trailingCommas": "all"
+		}
+	}
 }

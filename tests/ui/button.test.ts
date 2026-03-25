@@ -32,7 +32,7 @@ describe('createButton', () => {
 
 	test('creates button with idle state', () => {
 		const button = createButton('test-class');
-		expect(button.dataset['state']).toBe('idle');
+		expect(button.dataset.state).toBe('idle');
 	});
 });
 
@@ -40,7 +40,7 @@ describe('setButtonBusy', () => {
 	test('sets state to busy', () => {
 		const button = createButton('test') as ButtonElement;
 		setButtonBusy(button);
-		expect(button.dataset['state']).toBe('busy');
+		expect(button.dataset.state).toBe('busy');
 	});
 
 	test('sets text to Exporting', () => {
@@ -61,7 +61,7 @@ describe('setButtonIdle', () => {
 		const button = createButton('test') as ButtonElement;
 		setButtonBusy(button);
 		setButtonIdle(button);
-		expect(button.dataset['state']).toBe('idle');
+		expect(button.dataset.state).toBe('idle');
 	});
 
 	test('sets text back to Export chat', () => {

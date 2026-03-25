@@ -15,7 +15,7 @@ export function showToast(message: string, isError: boolean): void {
 	}
 
 	toast.textContent = message;
-	toast.dataset['type'] = isError ? 'error' : 'success';
+	toast.setAttribute('data-type', isError ? 'error' : 'success');
 	toast.classList.add('visible');
 
 	if (toast.__hideTimer !== undefined) {

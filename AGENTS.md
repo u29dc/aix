@@ -19,7 +19,7 @@
 │   └── utils/                download, filename, markdown, SPA navigation
 ├── tests/
 │   ├── integration/          fixture-backed export flow coverage
-│   ├── fixtures/             captured Claude and ChatGPT DOM snapshots
+│   ├── fixtures/             synthetic Claude and ChatGPT DOM fixtures
 │   └── helpers/              happy-dom factories and fixture loaders
 ├── assets/                   extension icons copied into dist/
 ├── dist/                     generated unpacked-extension payload
@@ -46,9 +46,10 @@
 - `bun run dev` - watch-build only [`dist/contentScript.js`](dist/contentScript.js); it does not recopy [`manifest.json`](manifest.json) or [`assets/`](assets/)
 - `bun run build` - produce the full unpacked extension in [`dist/`](dist/) with JS, manifest, and icons
 - `bun run util:lint` - read-only Biome check
+- `bun run util:scan:sensitive` - fail if tracked files contain publication blockers such as auth bootstrap markers, absolute home paths, or retired fixture names
 - `bun run util:types` - read-only `tsgo --noEmit`
 - `bun test --concurrent` - run unit and integration tests against fixture DOM
-- `bun run util:check` - write-enabled full gate; runs format, lint, types, and tests
+- `bun run util:check` - write-enabled full gate; runs format, lint, sensitive scan, types, and tests
 
 ## 5. Architecture
 
@@ -81,7 +82,7 @@
 ## 8. Constraints
 
 - Never hand-edit [`dist/`](dist/); `bun run dev` only refreshes JS and `bun run build` regenerates the full unpacked extension
-- Treat [`tests/fixtures/chatgpt1.html`](tests/fixtures/chatgpt1.html), [`tests/fixtures/chatgpt2.html`](tests/fixtures/chatgpt2.html), [`tests/fixtures/chatgpt3.html`](tests/fixtures/chatgpt3.html), [`tests/fixtures/chatgpt4.html`](tests/fixtures/chatgpt4.html), and [`tests/fixtures/chatgpt5.html`](tests/fixtures/chatgpt5.html) as large real DOM captures with incidental scripts and unrelated markup; search surgically and avoid broad cleanup edits
+- Keep [`tests/fixtures/`](tests/fixtures/) synthetic and reviewable; do not commit full live page captures, auth bootstrap blobs, sidebar history, or other account-scoped DOM dumps
 - Do not relax sanitize rules or hidden-node checks without proving exports stay clean on both platforms; they intentionally strip copy controls, system messages, and presentation-only DOM
 - Be careful changing [`src/utils/navigation.ts`](src/utils/navigation.ts); it monkey-patches the history API globally and has no teardown path in production code
 - Do not rename files in [`assets/`](assets/) without updating [`manifest.json`](manifest.json) and rebuilding [`dist/`](dist/)
@@ -89,9 +90,9 @@
 
 ## 9. Validation
 
-- Read-only completion gate: `bun run util:lint`, `bun run util:types`, `bun test --concurrent`
+- Read-only completion gate: `bun run util:lint`, `bun run util:scan:sensitive`, `bun run util:types`, `bun test --concurrent`
 - Build gate when changing shipped code, icons, or manifest: `bun run build`
-- Use `bun run util:check` only when you want the repo reformatted as part of the change; it runs [`util:format`](package.json) before lint, types, and tests
+- Use `bun run util:check` only when you want the repo reformatted as part of the change; it runs [`util:format`](package.json) before lint, the sensitive scan, types, and tests
 - If you change [`src/platforms/`](src/platforms/) or parser behavior, update fixture-backed coverage in [`tests/integration/`](tests/integration/) or [`tests/parsers/`](tests/parsers/) and keep [`tests/fixtures/`](tests/fixtures/) aligned with the new DOM assumptions
 - Manual smoke for platform changes: load [`dist/`](dist/) as an unpacked extension, verify the button appears exactly once on one Claude `/chat/<uuid>` page and one ChatGPT `/c/...` or `/g/...` page, then confirm the exported markdown preserves order, code blocks, lists, tables, and attachment or artifact sections
 - No CI or GitHub workflow is present in the repository; local validation is the completion bar

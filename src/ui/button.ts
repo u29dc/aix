@@ -16,7 +16,7 @@ export function createButton(className: string): ButtonElement {
 	button.textContent = 'Export chat';
 	button.className = className;
 	button.setAttribute('aria-label', 'Export chat');
-	button.dataset['state'] = 'idle';
+	button.dataset.state = 'idle';
 	return button;
 }
 
@@ -39,7 +39,7 @@ export function removeButton(): void {
  * Set button to busy state
  */
 export function setButtonBusy(button: ButtonElement): void {
-	button.dataset['state'] = 'busy';
+	button.dataset.state = 'busy';
 	button.textContent = 'Exporting\u2026';
 	button.disabled = true;
 }
@@ -48,7 +48,7 @@ export function setButtonBusy(button: ButtonElement): void {
  * Set button to idle state
  */
 export function setButtonIdle(button: ButtonElement): void {
-	button.dataset['state'] = 'idle';
+	button.dataset.state = 'idle';
 	button.textContent = 'Export chat';
 	button.disabled = false;
 }
