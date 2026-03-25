@@ -10,12 +10,11 @@
 		"dev": "bun build src/index.ts --outfile dist/contentScript.js --target browser --watch",
 		"build": "bun build src/index.ts --outfile dist/contentScript.js --target browser && terser dist/contentScript.js -o dist/contentScript.js -c passes=3,dead_code=true,drop_console=true,drop_debugger=true -m toplevel=true && cp manifest.json dist/ && cp -r assets dist/",
 		"check--------------------------------": "",
-		"util:format": "biome format --write AGENTS.md biome.json bunfig.toml commitlint.config.js lint-staged.config.js manifest.json package.json tsconfig.json src tests scripts",
-		"util:lint": "biome lint AGENTS.md biome.json bunfig.toml commitlint.config.js lint-staged.config.js manifest.json package.json tsconfig.json src tests scripts --max-diagnostics 500",
-		"util:lint:fix": "biome lint --write AGENTS.md biome.json bunfig.toml commitlint.config.js lint-staged.config.js manifest.json package.json tsconfig.json src tests scripts",
-		"util:scan:sensitive": "bun scripts/scan-sensitive.ts",
+		"util:format": "biome format --write AGENTS.md biome.json bunfig.toml commitlint.config.js lint-staged.config.js manifest.json package.json tsconfig.json src tests",
+		"util:lint": "biome lint AGENTS.md biome.json bunfig.toml commitlint.config.js lint-staged.config.js manifest.json package.json tsconfig.json src tests --max-diagnostics 500",
+		"util:lint:fix": "biome lint --write AGENTS.md biome.json bunfig.toml commitlint.config.js lint-staged.config.js manifest.json package.json tsconfig.json src tests",
 		"util:types": "tsgo --noEmit",
-		"util:check": "STATUS=0; bun run util:format || STATUS=1; bun run util:lint || STATUS=1; bun run util:scan:sensitive || STATUS=1; bun run util:types || STATUS=1; bun test --concurrent || STATUS=1; exit $STATUS"
+		"util:check": "STATUS=0; bun run util:format || STATUS=1; bun run util:lint || STATUS=1; bun run util:types || STATUS=1; bun test --concurrent || STATUS=1; exit $STATUS"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.8",

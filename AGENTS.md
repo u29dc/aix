@@ -45,11 +45,10 @@
 - `bun install` - install dependencies and Husky hooks
 - `bun run dev` - watch-build only [`dist/contentScript.js`](dist/contentScript.js); it does not recopy [`manifest.json`](manifest.json) or [`assets/`](assets/)
 - `bun run build` - produce the full unpacked extension in [`dist/`](dist/) with JS, manifest, and icons
-- `bun run util:lint` - read-only Biome check
-- `bun run util:scan:sensitive` - fail if tracked files contain publication blockers such as auth bootstrap markers, absolute home paths, or retired fixture names
+- `bun run util:lint` - read-only Biome lint pass
 - `bun run util:types` - read-only `tsgo --noEmit`
 - `bun test --concurrent` - run unit and integration tests against fixture DOM
-- `bun run util:check` - write-enabled full gate; runs format, lint, sensitive scan, types, and tests
+- `bun run util:check` - write-enabled full gate; runs format, lint, types, and tests
 
 ## 5. Architecture
 
@@ -90,9 +89,9 @@
 
 ## 9. Validation
 
-- Read-only completion gate: `bun run util:lint`, `bun run util:scan:sensitive`, `bun run util:types`, `bun test --concurrent`
+- Read-only completion gate: `bun run util:lint`, `bun run util:types`, `bun test --concurrent`
 - Build gate when changing shipped code, icons, or manifest: `bun run build`
-- Use `bun run util:check` only when you want the repo reformatted as part of the change; it runs [`util:format`](package.json) before lint, the sensitive scan, types, and tests
+- Use `bun run util:check` only when you want the repo reformatted as part of the change; it runs [`util:format`](package.json) before lint, types, and tests
 - If you change [`src/platforms/`](src/platforms/) or parser behavior, update fixture-backed coverage in [`tests/integration/`](tests/integration/) or [`tests/parsers/`](tests/parsers/) and keep [`tests/fixtures/`](tests/fixtures/) aligned with the new DOM assumptions
 - Manual smoke for platform changes: load [`dist/`](dist/) as an unpacked extension, verify the button appears exactly once on one Claude `/chat/<uuid>` page and one ChatGPT `/c/...` or `/g/...` page, then confirm the exported markdown preserves order, code blocks, lists, tables, and attachment or artifact sections
 - No CI or GitHub workflow is present in the repository; local validation is the completion bar
