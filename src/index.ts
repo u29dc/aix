@@ -104,10 +104,12 @@ function handleExportClick(): void {
 /**
  * Export the conversation
  */
-function exportConversation(): string {
+async function exportConversation(): Promise<string> {
 	if (!adapter) {
 		throw new Error('No platform adapter available');
 	}
+
+	await adapter.prepareForExport?.();
 
 	const messages = adapter.extractConversation();
 	if (!messages.length) {

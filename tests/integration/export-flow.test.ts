@@ -13,6 +13,7 @@ describe('Claude Export Flow Integration', () => {
 	let container: HTMLElement;
 
 	beforeEach(() => {
+		document.body.innerHTML = '';
 		container = createElement('main');
 		document.body.appendChild(container);
 	});

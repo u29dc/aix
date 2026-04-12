@@ -8,6 +8,7 @@ import {
 	deriveClaudeTitle,
 	extractClaudeConversation,
 	isEligibleClaudeConversation,
+	prepareClaudeConversationForExport,
 } from '@/platforms/claude';
 
 describe('isEligibleClaudeConversation', () => {
@@ -165,6 +166,7 @@ describe('extractClaudeConversation', () => {
 	}
 
 	beforeEach(() => {
+		document.body.innerHTML = '';
 		container = createElement('main');
 		document.body.appendChild(container);
 	});
@@ -324,5 +326,345 @@ describe('extractClaudeConversation', () => {
 		expect(messages).toHaveLength(2);
 		expect(messages[0]?.timestamp).toBe('Feb 14');
 		expect(messages[1]?.timestamp).toBe('Feb 14');
+	});
+
+	test('preserves Claude thinking summaries ahead of assistant content', () => {
+		const content = createElement('div', undefined, [
+			createElement('div', { class: 'grid grid-rows-[auto_auto] min-w-0' }, [
+				createElement('div', { class: 'row-start-1 col-start-1 min-w-0' }, [
+					createElement('div', { class: 'min-w-0 pl-2 py-1.5' }, [
+						createElement(
+							'button',
+							{
+								type: 'button',
+								class: 'group/status flex items-center gap-2 py-1 text-sm',
+								'aria-expanded': 'false',
+							},
+							[
+								createElement('div', { class: 'inline-flex items-center gap-1 min-w-0' }, [
+									createElement('span', { class: 'truncate text-sm font-base' }, [
+										'Prepared final response',
+									]),
+								]),
+							],
+						),
+						createElement('span', { class: 'sr-only', role: 'status', 'aria-live': 'polite' }, [
+							'Prepared final response',
+						]),
+						createElement(
+							'div',
+							{
+								class: 'grid transition-[grid-template-rows] duration-300 ease-out',
+								style: 'grid-template-rows: 1fr;',
+							},
+							[
+								createElement('div', { class: 'overflow-hidden min-w-0' }, [
+									createElement('div', { class: 'flex flex-col font-ui leading-normal' }, [
+										createElement('div', undefined, [
+											createElement(
+												'div',
+												{
+													class: 'standard-markdown grid-cols-1 grid gap-3 standard-markdown',
+												},
+												[
+													createElement('p', undefined, ['The user wants two things:']),
+													createElement('ol', undefined, [
+														createElement('li', undefined, ['First item']),
+														createElement('li', undefined, ['Second item']),
+													]),
+												],
+											),
+										]),
+										createElement('div', { class: 'pl-2.5 pt-0.5 text-text-300' }, ['Done']),
+									]),
+								]),
+							],
+						),
+					]),
+				]),
+				createElement('div', { class: 'row-start-2 col-start-1 relative grid isolate min-w-0' }, [
+					createElement('div', { class: 'row-start-1 col-start-1 relative z-[2] min-w-0' }, [
+						createElement('div', undefined, [
+							createElement(
+								'div',
+								{ class: 'standard-markdown grid-cols-1 grid gap-3 standard-markdown' },
+								[createElement('p', undefined, ['Final response text'])],
+							),
+						]),
+					]),
+				]),
+			]),
+		]);
+
+		container.appendChild(wrapClaudeMessage(createClaudeAssistantMessage(content)));
+
+		const messages = extractClaudeConversation();
+		expect(messages).toHaveLength(1);
+		expect(messages[0]?.markdown).toContain('**Thinking:**');
+		expect(messages[0]?.markdown).toContain('Prepared final response');
+		expect(messages[0]?.markdown).toContain('The user wants two things:');
+		expect(messages[0]?.markdown).toContain('1. First item');
+		expect(messages[0]?.markdown).not.toContain('\n\nDone\n\n');
+		expect(messages[0]?.markdown).toContain('Final response text');
+		expect(messages[0]?.markdown.indexOf('Prepared final response')).toBeLessThan(
+			messages[0]?.markdown.indexOf('The user wants two things:') ?? Number.MAX_SAFE_INTEGER,
+		);
+		expect(messages[0]?.markdown.indexOf('The user wants two things:')).toBeLessThan(
+			messages[0]?.markdown.indexOf('Final response text') ?? Number.MAX_SAFE_INTEGER,
+		);
+	});
+
+	test('extracts artifact cards from Claude open artifact buttons', () => {
+		const artifactCard = createElement('div', { class: 'group/artifact-block relative flex' }, [
+			createElement('button', {
+				type: 'button',
+				'aria-label': 'Todo. Open artifact.',
+			}),
+			createElement('div', { class: 'artifact-block-cell flex flex-1' }, [
+				createElement('div', { class: 'flex flex-col gap-1 py-4 min-w-0 flex-1' }, [
+					createElement('div', { class: 'leading-tight text-sm line-clamp-1' }, ['Todo']),
+					createElement('div', { class: 'text-xs line-clamp-1 text-text-400' }, ['Document · MD']),
+				]),
+			]),
+		]);
+
+		const assistant = createClaudeAssistantMessage(
+			createElement('div', undefined, [
+				createElement(
+					'div',
+					{ class: 'standard-markdown grid-cols-1 grid gap-3 standard-markdown' },
+					[createElement('p', undefined, ['Artifact summary'])],
+				),
+				artifactCard,
+			]),
+		);
+		container.appendChild(wrapClaudeMessage(assistant));
+
+		const messages = extractClaudeConversation();
+		expect(messages).toHaveLength(1);
+		expect(messages[0]?.markdown).toContain('**Artifacts:**');
+		expect(messages[0]?.markdown).toContain('Todo');
+		expect(messages[0]?.markdown).toContain('Document');
+	});
+
+	test('preserves assistant content inside non-thinking overflow-hidden containers', () => {
+		const assistant = createClaudeAssistantMessage(
+			createElement('div', undefined, [
+				createElement('div', { class: 'overflow-hidden' }, [
+					createElement(
+						'div',
+						{ class: 'standard-markdown grid-cols-1 grid gap-3 standard-markdown' },
+						[createElement('p', undefined, ['Actual assistant response'])],
+					),
+				]),
+			]),
+		);
+
+		container.appendChild(wrapClaudeMessage(assistant));
+
+		const messages = extractClaudeConversation();
+		expect(messages).toHaveLength(1);
+		expect(messages[0]?.markdown).toContain('Actual assistant response');
+	});
+
+	test('uses concise attachment labels from Claude file thumbnails', () => {
+		const thumbnail = createElement('div', { 'data-testid': 'file-thumbnail' }, [
+			createElement(
+				'button',
+				{
+					'aria-label': 'Pasted Text, pasted, 277 lines',
+				},
+				[
+					createElement('p', undefined, [
+						'Context handoff for continuing this discussion on my phone',
+					]),
+				],
+			),
+		]);
+
+		const wrapper = createElement('div', { 'data-test-render-count': '1' }, [
+			thumbnail,
+			createClaudeUserMessage('Attached a handoff note.'),
+		]);
+		container.appendChild(wrapper);
+
+		const messages = extractClaudeConversation();
+		expect(messages).toHaveLength(1);
+		expect(messages[0]?.markdown).toContain('**Attachments:**');
+		expect(messages[0]?.markdown).toContain('Pasted Text');
+		expect(messages[0]?.markdown).toContain('277 lines');
+		expect(messages[0]?.markdown).not.toContain('Context handoff for continuing this discussion');
+	});
+
+	test('ignores orphan claude-response fallback nodes outside message wrappers', () => {
+		container.appendChild(
+			createElement('div', { class: 'font-claude-response' }, [
+				createElement('p', undefined, ['[HAN]']),
+			]),
+		);
+		container.appendChild(createClaudeAssistantMessage('Actual assistant message'));
+
+		const messages = extractClaudeConversation();
+		expect(messages).toHaveLength(1);
+		expect(messages[0]?.markdown).toContain('Actual assistant message');
+		expect(messages[0]?.markdown).not.toContain('[HAN]');
+	});
+
+	test('expands collapsed Claude thinking panels before export', async () => {
+		const originalRequestAnimationFrame = window.requestAnimationFrame;
+		const originalSetTimeout = window.setTimeout;
+		const detailRoot = createElement('div', { class: 'overflow-hidden min-w-0' });
+		const toggle = createElement(
+			'button',
+			{
+				type: 'button',
+				class: 'group/status flex items-center gap-2 py-1 text-sm',
+				'aria-expanded': 'false',
+			},
+			['Prepared final response'],
+		);
+
+		toggle.addEventListener('click', () => {
+			toggle.setAttribute('aria-expanded', 'true');
+			detailRoot.appendChild(
+				createElement(
+					'div',
+					{ class: 'standard-markdown grid-cols-1 grid gap-3 standard-markdown' },
+					[createElement('p', undefined, ['The user wants two things:'])],
+				),
+			);
+		});
+
+		const assistant = createElement(
+			'div',
+			{ 'data-is-streaming': 'false', class: 'group relative' },
+			[
+				createElement('div', { class: 'font-claude-response' }, [
+					createElement('div', { class: 'min-w-0 pl-2 py-1.5' }, [
+						createElement('div', { class: 'flex items-center gap-2' }, [toggle]),
+						createElement(
+							'div',
+							{
+								class: 'grid transition-[grid-template-rows] duration-300 ease-out',
+								style: 'grid-template-rows: 0fr;',
+							},
+							[detailRoot],
+						),
+					]),
+					createElement(
+						'div',
+						{ class: 'standard-markdown grid-cols-1 grid gap-3 standard-markdown' },
+						[createElement('p', undefined, ['Final response text'])],
+					),
+				]),
+			],
+		);
+
+		container.appendChild(wrapClaudeMessage(assistant));
+
+		window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+			callback(0);
+			return 1;
+		}) as typeof window.requestAnimationFrame;
+		window.setTimeout = ((handler: TimerHandler, _timeout?: number, ..._arguments: unknown[]) => {
+			if (typeof handler === 'function') handler();
+			return 1;
+		}) as unknown as typeof window.setTimeout;
+
+		try {
+			await prepareClaudeConversationForExport();
+
+			const messages = extractClaudeConversation();
+			expect(messages).toHaveLength(1);
+			expect(messages[0]?.markdown).toContain('The user wants two things:');
+			expect(messages[0]?.markdown).toContain('Final response text');
+		} finally {
+			window.requestAnimationFrame = originalRequestAnimationFrame;
+			window.setTimeout = originalSetTimeout;
+		}
+	});
+
+	test('strips thinking-panel favicon and link noise while keeping narrative text', () => {
+		const content = createElement('div', undefined, [
+			createElement('div', { class: 'grid grid-rows-[auto_auto] min-w-0' }, [
+				createElement('div', { class: 'row-start-1 col-start-1 min-w-0' }, [
+					createElement('div', { class: 'min-w-0 pl-2 py-1.5' }, [
+						createElement('div', { class: 'flex items-center gap-2' }, [
+							createElement(
+								'button',
+								{
+									type: 'button',
+									class: 'group/status flex items-center gap-2 py-1 text-sm',
+									'aria-expanded': 'true',
+								},
+								['Searched the web'],
+							),
+						]),
+						createElement(
+							'div',
+							{
+								class: 'grid transition-[grid-template-rows] duration-300 ease-out',
+								style: 'grid-template-rows: 1fr;',
+							},
+							[
+								createElement('div', { class: 'overflow-hidden min-w-0' }, [
+									createElement(
+										'div',
+										{
+											class: 'standard-markdown grid-cols-1 grid gap-3 standard-markdown',
+										},
+										[
+											createElement('p', undefined, [
+												'Now let me research the WhatsApp Cloud API webhook requirements.',
+												createElement('img', {
+													src: 'https://www.google.com/s2/favicons?domain=facebook.com&sz=32',
+													alt: '',
+												}),
+												createElement(
+													'a',
+													{
+														href: 'https://developers.facebook.com/docs/whatsapp/cloud-api/guides/set-up-webhooks/',
+													},
+													['Webhooks - WhatsApp Cloud API'],
+												),
+											]),
+											createElement('p', undefined, [
+												'Key finding: WhatsApp Cloud API requires a dedicated phone number.',
+											]),
+											createElement('p', undefined, ['Done']),
+										],
+									),
+								]),
+							],
+						),
+					]),
+				]),
+				createElement('div', { class: 'row-start-2 col-start-1 relative grid isolate min-w-0' }, [
+					createElement('div', { class: 'row-start-1 col-start-1 relative z-[2] min-w-0' }, [
+						createElement(
+							'div',
+							{ class: 'standard-markdown grid-cols-1 grid gap-3 standard-markdown' },
+							[createElement('p', undefined, ['Final response text'])],
+						),
+					]),
+				]),
+			]),
+		]);
+
+		container.appendChild(wrapClaudeMessage(createClaudeAssistantMessage(content)));
+
+		const messages = extractClaudeConversation();
+		expect(messages).toHaveLength(1);
+		expect(messages[0]?.markdown).toContain(
+			'Now let me research the WhatsApp Cloud API webhook requirements.',
+		);
+		expect(messages[0]?.markdown).toContain(
+			'Key finding: WhatsApp Cloud API requires a dedicated phone number.',
+		);
+		expect(messages[0]?.markdown).toContain('Final response text');
+		expect(messages[0]?.markdown).not.toContain('google.com/s2');
+		expect(messages[0]?.markdown).not.toContain('developers.facebook.com');
+		expect(messages[0]?.markdown).not.toContain('Webhooks - WhatsApp Cloud API');
+		expect(messages[0]?.markdown).not.toContain('\n\nDone\n\n');
 	});
 });

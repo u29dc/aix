@@ -79,9 +79,12 @@ const MARKDOWN_BLOCK_SELECTORS = [
 	'.markdown',
 	'.prose',
 ].join(', ');
-const ARTIFACT_CARD_SELECTOR = '[aria-label="Preview contents"]';
+const LEGACY_ARTIFACT_CARD_SELECTOR = '[aria-label="Preview contents"]';
+const ARTIFACT_BUTTON_SELECTOR = 'button[aria-label*="Open artifact"]';
 const FILE_THUMBNAIL_SELECTOR = '[data-testid="file-thumbnail"]';
 const MESSAGE_ACTIONS_SELECTOR = '[aria-label="Message actions"]';
+const THINKING_STATUS_SELECTOR = 'button[aria-expanded]';
+const COLLAPSED_THINKING_SELECTOR = `${CLAUDE_SELECTORS.assistantMessage.primary} ${THINKING_STATUS_SELECTOR}[aria-expanded="false"]`;
 
 function isSystemMessage(node: Element): boolean {
 	return node.closest('[data-message-author-role="system"]') !== null;
@@ -171,8 +174,20 @@ function selectInnermost(elements: Element[]): Element[] {
 	);
 }
 
+function isWithinThinkingPanel(element: Element): boolean {
+	for (let current: Element | null = element; current; current = current.parentElement) {
+		if (!current.classList.contains('overflow-hidden')) continue;
+		const section = current.closest('.min-w-0.pl-2.py-1\\.5');
+		if (section?.querySelector(THINKING_STATUS_SELECTOR)) return true;
+	}
+
+	return false;
+}
+
 function collectMarkdownBlocks(node: Element): Element[] {
-	const blocks = Array.from(node.querySelectorAll(MARKDOWN_BLOCK_SELECTORS));
+	const blocks = Array.from(node.querySelectorAll(MARKDOWN_BLOCK_SELECTORS)).filter(
+		(block) => !isWithinThinkingPanel(block),
+	);
 	if (blocks.length === 0) return [];
 	const standardBlocks = blocks.filter(
 		(block) =>
@@ -227,18 +242,142 @@ function formatArtifactEntry(title: string, meta: string): string {
 	return escapeMarkdown(title);
 }
 
-function extractArtifactEntries(node: Element): string[] {
-	const cards = Array.from(node.querySelectorAll(ARTIFACT_CARD_SELECTOR));
-	if (cards.length === 0) return [];
+function extractArtifactLabel(button: Element): string {
+	const ariaLabel = normalizeInlineText(button.getAttribute('aria-label') ?? '');
+	if (!ariaLabel) return '';
 
+	return ariaLabel
+		.replace(/\.\s*open artifact\.?$/i, '')
+		.replace(/\s+open artifact\.?$/i, '')
+		.trim();
+}
+
+function extractArtifactEntries(node: Element): string[] {
 	const entries: string[] = [];
-	for (const card of cards) {
+
+	for (const card of Array.from(node.querySelectorAll(LEGACY_ARTIFACT_CARD_SELECTOR))) {
 		const { title, meta } = extractCardTitleAndMeta(card);
 		if (!title) continue;
 		entries.push(formatArtifactEntry(title, meta));
 	}
 
+	for (const button of Array.from(node.querySelectorAll(ARTIFACT_BUTTON_SELECTOR))) {
+		const card = button.parentElement ?? button;
+		const { title: cardTitle, meta } = extractCardTitleAndMeta(card);
+		const title = cardTitle || extractArtifactLabel(button);
+		if (!title) continue;
+		entries.push(formatArtifactEntry(title, meta));
+	}
+
 	return uniqueStrings(entries);
+}
+
+function extractThinkingSummaries(node: Element): string[] {
+	const summaries = Array.from(node.querySelectorAll(THINKING_STATUS_SELECTOR))
+		.map((button) => {
+			const buttonText = normalizeInlineText(button.textContent ?? '');
+			if (buttonText) return buttonText;
+
+			const statusText = normalizeInlineText(
+				button.parentElement?.querySelector('[role="status"]')?.textContent ?? '',
+			);
+			return statusText;
+		})
+		.filter((summary) => summary.length > 0);
+
+	return uniqueStrings(summaries);
+}
+
+function stripThinkingOnlyNodes(root: Element): void {
+	for (const image of Array.from(root.querySelectorAll('img, picture, source'))) {
+		image.remove();
+	}
+
+	for (const link of Array.from(root.querySelectorAll('a'))) {
+		link.remove();
+	}
+}
+
+function cleanThinkingMarkdown(markdown: string): string {
+	const paragraphs = markdown
+		.split(/\n{2,}/)
+		.map((paragraph) =>
+			paragraph
+				.replace(/!\[[^\]]*]\([^)]+\)/g, '')
+				.replace(/\[[^\]]+]\([^)]+\)/g, '')
+				.replace(/(?:^|\s)Done\.?(?=$|\s)/g, ' ')
+				.replace(/[ \t]+\n/g, '\n')
+				.replace(/\n{3,}/g, '\n\n')
+				.trim(),
+		)
+		.filter((paragraph) => paragraph.length > 0 && !/^Done\.?$/i.test(paragraph));
+
+	return uniqueStrings(paragraphs).join('\n\n');
+}
+
+function extractExpandedThinkingDetails(node: Element): string[] {
+	const details: string[] = [];
+
+	for (const button of Array.from(node.querySelectorAll(THINKING_STATUS_SELECTOR))) {
+		const section = button.closest('.min-w-0.pl-2.py-1\\.5') ?? button.parentElement?.parentElement;
+		if (!section) continue;
+
+		const panel = Array.from(section.children).find(
+			(child) =>
+				child !== button &&
+				!child.matches('[role="status"]') &&
+				child.querySelector('.overflow-hidden') !== null,
+		);
+		if (!panel) continue;
+
+		const contentRoot = panel.querySelector('.overflow-hidden');
+		if (!contentRoot) continue;
+
+		const sanitized = sanitizeElement(contentRoot, {
+			removeSelectors: SANITIZE_SELECTORS,
+		});
+		stripThinkingOnlyNodes(sanitized);
+		const markdown = cleanThinkingMarkdown(convertNodeToMarkdown(sanitized).trim());
+		if (!markdown) continue;
+
+		details.push(markdown);
+	}
+
+	return uniqueStrings(details);
+}
+
+function waitForNextFrame(): Promise<void> {
+	return new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
+}
+
+/**
+ * Expand Claude thinking/status panels before extraction so visible inner reasoning
+ * and progress outlines are captured when Claude lazily renders them on open.
+ */
+export async function prepareClaudeConversationForExport(): Promise<void> {
+	const root = findChatRoot();
+	const buttons = Array.from(root.querySelectorAll(COLLAPSED_THINKING_SELECTOR));
+	if (buttons.length === 0) return;
+
+	for (const button of buttons) {
+		if (!(button instanceof HTMLElement)) continue;
+		button.click();
+	}
+
+	// Claude mounts panel content after the toggle; wait for the DOM to settle.
+	await waitForNextFrame();
+	await waitForNextFrame();
+	await new Promise((resolve) => window.setTimeout(resolve, 75));
+}
+
+function parseAttachmentAriaLabel(label: string): { title: string; meta: string } {
+	const parts = label
+		.split(',')
+		.map((part) => normalizeInlineText(part))
+		.filter((part) => part.length > 0);
+
+	const [title = '', ...metaParts] = parts;
+	return { title, meta: metaParts.join(', ') };
 }
 
 function extractUserAttachments(node: Element): string[] {
@@ -250,6 +389,14 @@ function extractUserAttachments(node: Element): string[] {
 
 	const entries = thumbnails
 		.map((thumb) => {
+			const button = thumb.querySelector('button[aria-label]');
+			const parsedLabel = parseAttachmentAriaLabel(
+				normalizeInlineText(button?.getAttribute('aria-label') ?? ''),
+			);
+			if (parsedLabel.title) {
+				return formatArtifactEntry(parsedLabel.title, parsedLabel.meta);
+			}
+
 			const name = normalizeInlineText(thumb.querySelector('h3')?.textContent ?? '');
 			const type = normalizeInlineText(thumb.querySelector('p')?.textContent ?? '');
 			if (!name && !type) return '';
@@ -262,8 +409,15 @@ function extractUserAttachments(node: Element): string[] {
 }
 
 function extractAssistantMarkdown(node: Element): string {
-	const blocks = collectMarkdownBlocks(node);
 	const markdownChunks: string[] = [];
+	const thinking = extractThinkingSummaries(node);
+	const thinkingSection = formatListSection('Thinking', thinking);
+	if (thinkingSection) markdownChunks.push(thinkingSection);
+
+	const thinkingDetails = extractExpandedThinkingDetails(node);
+	markdownChunks.push(...thinkingDetails);
+
+	const blocks = collectMarkdownBlocks(node);
 
 	if (blocks.length > 0) {
 		const seen = new Set<string>();
@@ -310,6 +464,11 @@ function extractUserMarkdown(node: Element): string {
 function processMessageCandidate(node: Element): Message | null {
 	if (isSystemMessage(node)) return null;
 	const isUser = node.matches(USER_SELECTOR);
+	const wrapper = node.closest('[data-test-render-count]');
+	if (!isUser && !wrapper && !node.matches(CLAUDE_SELECTORS.assistantMessage.primary)) {
+		return null;
+	}
+
 	const role: 'user' | 'assistant' = isUser ? 'user' : 'assistant';
 	const markdown = isUser ? extractUserMarkdown(node) : extractAssistantMarkdown(node);
 	const timestamp = extractMessageTimestamp(node);
@@ -366,6 +525,7 @@ export const claudeAdapter: PlatformConfig = {
 	platform: 'claude',
 	displayName: 'Claude',
 	ensureButton: ensureClaudeButton,
+	prepareForExport: prepareClaudeConversationForExport,
 	extractConversation: extractClaudeConversation,
 	deriveTitle: deriveClaudeTitle,
 	isEligibleConversation: isEligibleClaudeConversation,
