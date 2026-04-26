@@ -8,6 +8,7 @@ import { escapeMarkdown, normalizeMarkdown, wrapInlineCode, wrapMarkdown } from 
 export type ConvertNodeFn = (node: Node, context?: ConversionContext) => string;
 
 const DEFAULT_CONTEXT: ConversionContext = { listDepth: 0 };
+const CHATGPT_THUMBNAIL_PREFIX = 'https://images.openai.com/thumbnails/';
 
 /**
  * Format a blockquote element as markdown
@@ -35,17 +36,60 @@ function formatLink(element: Element, context: ConversionContext): string {
  * Format an image element as markdown
  */
 function formatImage(element: Element): string {
-	const alt = element.getAttribute('alt') ?? 'Image';
+	const alt = element.getAttribute('alt')?.trim() || 'Image';
 	const src = element.getAttribute('src') ?? '';
-	return src ? `![${alt}](${src})` : `![${alt}]`;
+	const label = escapeMarkdown(alt);
+	if (src.startsWith(CHATGPT_THUMBNAIL_PREFIX) && element.closest('table')) return '';
+	return src ? `![${label}](${src})` : `![${label}]`;
+}
+
+function extractTexAnnotation(element: Element): string {
+	const annotation = element.matches('annotation[encoding="application/x-tex"]')
+		? element
+		: element.querySelector('annotation[encoding="application/x-tex"]');
+	return annotation?.textContent?.trim() ?? '';
+}
+
+function isDisplayMath(element: Element): boolean {
+	const mathElement = element.matches('math') ? element : element.querySelector('math');
+	return (
+		mathElement?.getAttribute('display') === 'block' || element.closest('.katex-display') !== null
+	);
+}
+
+function isMathElement(element: Element): boolean {
+	const tag = element.tagName.toLowerCase();
+	return (
+		tag === 'math' ||
+		element.classList.contains('katex') ||
+		element.classList.contains('katex-mathml')
+	);
+}
+
+function formatMath(element: Element): string {
+	const tex = extractTexAnnotation(element);
+	if (!tex) return '';
+	return isDisplayMath(element) ? `$$\n${tex}\n$$\n\n` : `$${tex}$`;
 }
 
 /**
  * Format a heading element as markdown
  */
 function formatHeading(element: Element, level: number, context: ConversionContext): string {
+	const content = collectChildrenMarkdown(element, context).trim();
+	if (!content) return '';
 	const hashes = '#'.repeat(Math.min(Math.max(level, 1), 6));
-	return `${hashes} ${collectChildrenMarkdown(element, context).trim()}\n\n`;
+	return `${hashes} ${content}\n\n`;
+}
+
+function formatDetails(element: Element, context: ConversionContext): string {
+	const inner = collectNonWhitespaceChildrenMarkdown(element, context).trim();
+	return `<details>\n${inner}\n</details>\n\n`;
+}
+
+function formatSummary(element: Element, context: ConversionContext): string {
+	const inner = collectChildrenMarkdown(element, context).trim();
+	return `<summary>${inner}</summary>\n\n`;
 }
 
 /**
@@ -91,6 +135,7 @@ export function convertNodeToMarkdown(
  */
 function convertElementToMarkdown(element: Element, context: ConversionContext): string {
 	const tag = element.tagName.toLowerCase();
+	if (isMathElement(element)) return formatMath(element);
 
 	switch (tag) {
 		case 'p':
@@ -127,6 +172,10 @@ function convertElementToMarkdown(element: Element, context: ConversionContext):
 			return collectChildrenMarkdown(element, context).trim();
 		case 'blockquote':
 			return formatBlockquote(element, context);
+		case 'details':
+			return formatDetails(element, context);
+		case 'summary':
+			return formatSummary(element, context);
 		case 'a':
 			return formatLink(element, context);
 		case 'img':
@@ -153,6 +202,18 @@ function convertElementToMarkdown(element: Element, context: ConversionContext):
 export function collectChildrenMarkdown(element: Element, context: ConversionContext): string {
 	let output = '';
 	for (const child of Array.from(element.childNodes)) {
+		output += convertNodeToMarkdown(child, context);
+	}
+	return output;
+}
+
+function collectNonWhitespaceChildrenMarkdown(
+	element: Element,
+	context: ConversionContext,
+): string {
+	let output = '';
+	for (const child of Array.from(element.childNodes)) {
+		if (child.nodeType === Node.TEXT_NODE && !child.nodeValue?.trim()) continue;
 		output += convertNodeToMarkdown(child, context);
 	}
 	return output;

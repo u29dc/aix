@@ -54,7 +54,7 @@ describe('ChatGPT Export Flow Integration', () => {
 			const withArtifacts = messages.find(
 				(message) => message.role === 'assistant' && message.markdown.includes('Artifacts'),
 			);
-			expect(withArtifacts?.markdown).toContain('launch\\-plan.pdf');
+			expect(withArtifacts?.markdown).toContain('launch-plan.pdf');
 		} finally {
 			container.remove();
 		}
@@ -69,6 +69,34 @@ describe('ChatGPT Export Flow Integration', () => {
 			expect(messages[0]?.markdown).toContain('Fallback user message');
 			expect(messages[1]?.role).toBe('assistant');
 			expect(messages[1]?.markdown).toContain('**formatted**');
+		} finally {
+			container.remove();
+		}
+	});
+
+	test('extracts current section-based ChatGPT markdown turns', () => {
+		const container = mountFixture('chatgpt-thread-current-markdown.html');
+		try {
+			const messages = extractChatGPTConversation();
+			expect(messages).toHaveLength(2);
+			expect(messages.map((message) => message.role)).toEqual(['user', 'assistant']);
+
+			const assistant = messages[1]?.markdown ?? '';
+			expect(assistant).toContain('I will outline the fixture first.');
+			expect(assistant).toContain('Early result: section-based turns are mounted.');
+			expect(assistant).toContain('# H1: Export Fixture');
+			expect(assistant).toContain('| Feature | Status |');
+			expect(assistant).toContain('- [x]');
+			expect(assistant).toContain('- Parent item\n  - Child item\n    - Grandchild item');
+			expect(assistant).toContain('$E = mc^2$');
+			expect(assistant).toContain('$$\nf(x) = \\frac{1}{1 + e^{-x}}\n$$');
+			expect(assistant).toContain('<details>');
+			expect(assistant).toContain('<summary>Expandable test section</summary>');
+			expect(assistant).toContain('```python');
+			expect(assistant).toContain('def score_fixture(markdown: str) -> dict:');
+			expect(assistant).toContain('```diff');
+			expect(assistant).toContain('+ new export parser: preserves code lines');
+			expect(assistant).toContain('Final plain paragraph after several Markdown structures.');
 		} finally {
 			container.remove();
 		}

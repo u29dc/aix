@@ -58,9 +58,7 @@ describe('formatList', () => {
 				{ text: 'Parent', children: [{ text: 'Child 1' }, { text: 'Child 2' }] },
 			]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toContain('- Parent');
-			expect(result).toContain('  - Child 1');
-			expect(result).toContain('  - Child 2');
+			expect(result).toBe('- Parent\n  - Child 1\n  - Child 2\n\n');
 		});
 
 		test('handles 3 levels of nesting', () => {
@@ -76,9 +74,7 @@ describe('formatList', () => {
 				},
 			]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toContain('- Level 1');
-			expect(result).toContain('  - Level 2');
-			expect(result).toContain('    - Level 3');
+			expect(result).toBe('- Level 1\n  - Level 2\n    - Level 3\n\n');
 		});
 
 		test('handles mixed ul/ol nesting', () => {
@@ -90,9 +86,7 @@ describe('formatList', () => {
 				},
 			]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toContain('- Unordered parent');
-			expect(result).toContain('  1. Ordered child 1');
-			expect(result).toContain('  2. Ordered child 2');
+			expect(result).toBe('- Unordered parent\n  1. Ordered child 1\n  2. Ordered child 2\n\n');
 		});
 	});
 

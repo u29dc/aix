@@ -22,6 +22,9 @@ const CHATGPT_SANITIZE_SELECTORS = SANITIZE_SELECTORS.filter(
 const TURN_SELECTOR = buildCombinedSelector(CHATGPT_SELECTORS.conversationTurn);
 const USER_SELECTOR = buildCombinedSelector(CHATGPT_SELECTORS.userMessage);
 const ASSISTANT_SELECTOR = buildCombinedSelector(CHATGPT_SELECTORS.assistantMessage);
+const CHATGPT_ASSISTANT_BLOCK_SELECTOR = '.markdown, .prose, [data-message-content]';
+const CHATGPT_USER_BLOCK_SELECTOR =
+	'.whitespace-pre-wrap, .markdown, .prose, [data-message-content]';
 
 /**
  * Check if current page is an eligible ChatGPT conversation
@@ -96,11 +99,18 @@ function collectMessageBlocks(root: Element, selector: string): Element[] {
 }
 
 function collectAssistantBlocks(turn: Element): Element[] {
-	const candidates = Array.from(turn.querySelectorAll('.markdown, .prose'));
+	const candidates = Array.from(turn.querySelectorAll(CHATGPT_ASSISTANT_BLOCK_SELECTOR));
 	if (candidates.length === 0) return [];
 
 	const filtered = candidates.filter((element) => {
-		if (element.classList.contains('prose') && element.closest('.markdown')) return false;
+		const closestMarkdown = element.closest('.markdown');
+		if (
+			element.classList.contains('prose') &&
+			closestMarkdown !== null &&
+			closestMarkdown !== element
+		) {
+			return false;
+		}
 		return true;
 	});
 
@@ -131,7 +141,7 @@ function extractFileCards(root: Element): string[] {
 
 function extractUserMarkdown(turn: Element): string {
 	const message = querySelector(turn, CHATGPT_SELECTORS.userMessage) ?? turn;
-	const blocks = collectMessageBlocks(message, '.whitespace-pre-wrap, .markdown');
+	const blocks = collectMessageBlocks(message, CHATGPT_USER_BLOCK_SELECTOR);
 	const markdownChunks: string[] = [];
 
 	if (blocks.length > 0) {

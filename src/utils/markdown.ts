@@ -3,7 +3,18 @@
  */
 export function escapeMarkdown(text: string): string {
 	if (!text) return '';
-	return text.replace(/\u00a0/g, ' ').replace(/([\\`*_{}[\]()#+\-!>])/g, '\\$1');
+	return text
+		.replace(/\u00a0/g, ' ')
+		.replace(/\\/g, '\\\\')
+		.replace(/`/g, '\\`')
+		.replace(/\*/g, '\\*')
+		.replace(/(^|\n)([ \t]*)\\\*(?=\s)/g, '$1$2*')
+		.replace(/\[/g, '\\[')
+		.replace(/]/g, '\\]')
+		.replace(/!\[/g, '!\\[')
+		.replace(/(^|\n)([ \t]*)(#{1,6})(?=\s)/g, '$1$2\\$3')
+		.replace(/(^|\n)([ \t]*)(>)(?=\s)/g, '$1$2\\$3')
+		.replace(/(^|\n)([ \t]*)([-+])(?=\s)/g, '$1$2\\$3');
 }
 
 /**

@@ -28,7 +28,7 @@ describe('escapeMarkdown', () => {
 	});
 
 	test('escapes brackets', () => {
-		expect(escapeMarkdown('[link](url)')).toBe('\\[link\\]\\(url\\)');
+		expect(escapeMarkdown('[link](url)')).toBe('\\[link\\](url)');
 	});
 
 	test('escapes hash symbols', () => {
@@ -41,6 +41,30 @@ describe('escapeMarkdown', () => {
 
 	test('escapes multiple special characters', () => {
 		expect(escapeMarkdown('**bold** and `code`')).toBe('\\*\\*bold\\*\\* and \\`code\\`');
+	});
+
+	test('preserves line-start star bullets', () => {
+		expect(escapeMarkdown('* item\n  * nested item\nnot * emphasis')).toBe(
+			'* item\n  * nested item\nnot \\* emphasis',
+		);
+	});
+
+	test('does not escape normal punctuation inside prose', () => {
+		expect(escapeMarkdown('Markdown-heavy Python + diff f(x) {ok}')).toBe(
+			'Markdown-heavy Python + diff f(x) {ok}',
+		);
+	});
+
+	test('escapes block syntax markers only at line starts', () => {
+		expect(escapeMarkdown('# heading\n- item\n+ item\n> quote')).toBe(
+			'\\# heading\n\\- item\n\\+ item\n\\> quote',
+		);
+	});
+
+	test('preserves raw HTML-looking tags in text', () => {
+		expect(escapeMarkdown('<details>\n<summary>Title</summary>\n</details>')).toBe(
+			'<details>\n<summary>Title</summary>\n</details>',
+		);
 	});
 });
 

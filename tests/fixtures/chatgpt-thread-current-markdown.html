@@ -1,0 +1,86 @@
+<body>
+	<main>
+		<section data-testid="conversation-turn-1" data-turn="user">
+			<div data-message-author-role="user">
+				<h4 class="sr-only">You said:</h4>
+				<div class="[overflow-wrap:anywhere] whitespace-pre-wrap">
+					Create a markdown-heavy fixture with headings, a table, checkboxes, nested lists, blockquotes,
+					and code blocks.
+				</div>
+			</div>
+		</section>
+
+		<section data-testid="conversation-turn-2" data-turn="assistant">
+			<div data-message-author-role="assistant">
+				<h4 class="sr-only">ChatGPT said:</h4>
+				<div class="markdown prose dark:prose-invert w-full wrap-break-word dark markdown-new-styling">
+					<p>I will outline the fixture first.</p>
+				</div>
+			</div>
+
+			<div data-message-author-role="assistant">
+				<div class="markdown prose dark:prose-invert w-full wrap-break-word dark markdown-new-styling">
+					<p>Early result: section-based turns are mounted.</p>
+				</div>
+			</div>
+
+			<div data-message-author-role="assistant">
+				<div class="markdown prose dark:prose-invert w-full wrap-break-word dark markdown-new-styling">
+					<h1>H1: Export Fixture</h1>
+					<h2>H2: Mixed Markdown Elements</h2>
+					<h3>H3: Visible reasoning-style note</h3>
+					<blockquote>
+						<p><strong>Visible analysis note:</strong></p>
+						<p>This blockquote checks multi-line quote preservation.</p>
+					</blockquote>
+					<p>Regular paragraph with <strong>bold</strong>, <em>italic</em>, <code>inline code</code>, <s>strikethrough</s>, and <a href="https://example.com">a sample link</a>.</p>
+					<table>
+						<thead>
+							<tr>
+								<th>Feature</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Headings</td>
+								<td>Pass</td>
+							</tr>
+							<tr>
+								<td>Code block</td>
+								<td>Pass</td>
+							</tr>
+						</tbody>
+					</table>
+					<ul>
+						<li><input type="checkbox" checked /> Render headings</li>
+						<li><input type="checkbox" /> Verify extension export output</li>
+					</ul>
+					<ol>
+						<li>Capture the message.</li>
+						<li>Export through the browser extension.</li>
+					</ol>
+					<ul>
+						<li>Parent item<ul><li>Child item<ul><li>Grandchild item</li></ul></li></ul></li>
+						<li>Another parent item</li>
+					</ul>
+					<p>Inline math: <span class="katex"><span class="katex-mathml"><math><semantics><mrow></mrow><annotation encoding="application/x-tex">E = mc^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true">E=mc²</span></span></p>
+					<p>Block:</p>
+					<span class="katex"><span class="katex-mathml"><math display="block"><semantics><mrow></mrow><annotation encoding="application/x-tex">f(x) = \frac{1}{1 + e^{-x}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true">visual math</span></span>
+					<h2>HTML details block</h2>
+					&lt;details&gt;
+					&lt;summary&gt;Expandable test section&lt;/summary&gt;
+					<p>This checks whether the exporter preserves HTML-looking text.</p>
+					<ul>
+						<li>Hidden bullet A</li>
+						<li>Hidden bullet B</li>
+					</ul>
+					&lt;/details&gt;
+					<pre class="overflow-visible! px-0!"><div class="sticky z-2 select-none"><div class="font-medium"><svg aria-hidden="true"></svg>Python</div><button aria-label="Copy">Copy</button><button type="button">Run</button></div><div id="code-block-viewer"><div class="cm-content q9tKkq_readonly"><span>def score_fixture(markdown: str) -&gt; dict:</span><br><span>    return {"has_table": "|" in markdown}</span></div></div></pre>
+					<pre class="overflow-visible! px-0!"><div class="sticky z-2 select-none"><div class="font-medium"><svg aria-hidden="true"></svg>Diff</div><button aria-label="Copy">Copy</button></div><div id="code-block-viewer"><div class="cm-content q9tKkq_readonly"><span>- old export parser: brittle</span><br><span>+ new export parser: preserves code lines</span></div></div></pre>
+					<p>Final plain paragraph after several Markdown structures.</p>
+				</div>
+			</div>
+		</section>
+	</main>
+</body>

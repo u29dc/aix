@@ -176,6 +176,31 @@ describe('extractChatGPTConversation', () => {
 		expect(messages[0]?.markdown).toBe('Only once');
 	});
 
+	test('keeps markdown prose blocks that are themselves markdown roots', () => {
+		container.appendChild(
+			createFallbackTurn(0, 'assistant', [
+				createElement('div', { 'data-message-author-role': 'assistant' }, [
+					createElement('div', { class: 'markdown prose' }, [
+						createElement('p', undefined, ['Planning chunk']),
+					]),
+				]),
+				createElement('div', { 'data-message-author-role': 'assistant' }, [
+					createElement('div', { class: 'markdown prose' }, [
+						createElement('p', undefined, ['Final answer chunk']),
+					]),
+				]),
+			]),
+		);
+
+		const messages = extractChatGPTConversation();
+		expect(messages).toHaveLength(1);
+		expect(messages[0]?.markdown).toContain('Planning chunk');
+		expect(messages[0]?.markdown).toContain('Final answer chunk');
+		expect(messages[0]?.markdown.indexOf('Planning chunk')).toBeLessThan(
+			messages[0]?.markdown.indexOf('Final answer chunk') ?? -1,
+		);
+	});
+
 	test('formats user attachments and assistant artifacts as markdown sections', () => {
 		const userTurn = createStandardTurn(0, 'user', [
 			createElement('div', { class: 'whitespace-pre-wrap' }, ['Please review the files.']),

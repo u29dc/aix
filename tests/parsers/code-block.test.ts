@@ -138,4 +138,21 @@ line 3`;
 		const result = formatCodeBlock(pre);
 		expect(result).toBe('```python\nprint("hello")\n```\n\n');
 	});
+
+	test('extracts ChatGPT CodeMirror-backed code blocks', () => {
+		const pre = createElement('pre', { class: 'overflow-visible! px-0!' }, [
+			createElement('div', { class: 'sticky z-2 select-none' }, [
+				createElement('div', { class: 'font-medium' }, ['Python']),
+				createElement('button', { type: 'button' }, ['Run']),
+			]),
+			createElement('div', { class: 'cm-content q9tKkq_readonly' }, [
+				createElement('span', undefined, ['def hello():']),
+				createElement('br'),
+				createElement('span', undefined, ['    return "world"']),
+			]),
+		]);
+
+		const result = formatCodeBlock(pre);
+		expect(result).toBe('```python\ndef hello():\n    return "world"\n```\n\n');
+	});
 });

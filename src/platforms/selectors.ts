@@ -51,8 +51,11 @@ export const CLAUDE_SELECTORS = {
  */
 export const CHATGPT_SELECTORS = {
 	conversationTurn: {
-		primary: 'article[data-testid^="conversation-turn"]',
-		fallbacks: ['[data-testid^="conversation-turn"]'],
+		primary: '[data-testid^="conversation-turn"]',
+		fallbacks: [
+			'section[data-testid^="conversation-turn"]',
+			'article[data-testid^="conversation-turn"]',
+		],
 	},
 	message: {
 		primary: '[data-message-author-role]',
@@ -60,21 +63,18 @@ export const CHATGPT_SELECTORS = {
 	},
 	userMessage: {
 		primary: '[data-message-author-role="user"]',
-		fallbacks: [
-			'article[data-turn="user"] [data-message-author-role="user"]',
-			'[data-turn="user"]',
-		],
+		fallbacks: ['[data-turn="user"] [data-message-author-role="user"]', '[data-turn="user"]'],
 	},
 	assistantMessage: {
 		primary: '[data-message-author-role="assistant"]',
 		fallbacks: [
-			'article[data-turn="assistant"] [data-message-author-role="assistant"]',
+			'[data-turn="assistant"] [data-message-author-role="assistant"]',
 			'[data-turn="assistant"]',
 		],
 	},
 	messageContent: {
 		primary: '.markdown',
-		fallbacks: ['.whitespace-pre-wrap', '.prose'],
+		fallbacks: ['[data-message-content]', '.whitespace-pre-wrap', '.prose'],
 	},
 	chatContainer: {
 		primary: 'main',

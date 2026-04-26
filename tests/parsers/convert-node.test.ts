@@ -145,6 +145,11 @@ describe('convertNodeToMarkdown', () => {
 			expect(convertNodeToMarkdown(el)).toBe('###### Tiny\n\n');
 		});
 
+		test('skips empty headings', () => {
+			const el = createElement('h2', undefined, ['   ']);
+			expect(convertNodeToMarkdown(el)).toBe('');
+		});
+
 		test('converts hr to horizontal rule', () => {
 			const el = createElement('hr');
 			expect(convertNodeToMarkdown(el)).toBe('\n---\n\n');
@@ -180,6 +185,71 @@ describe('convertNodeToMarkdown', () => {
 		test('handles image with no src', () => {
 			const el = createElement('img', { alt: 'No source' });
 			expect(convertNodeToMarkdown(el)).toBe('![No source]');
+		});
+
+		test('keeps ChatGPT thumbnail images outside tables', () => {
+			const el = createElement('img', {
+				src: 'https://images.openai.com/thumbnails/url/example',
+				alt: 'Product thumbnail',
+			});
+			expect(convertNodeToMarkdown(el)).toBe(
+				'![Product thumbnail](https://images.openai.com/thumbnails/url/example)',
+			);
+		});
+	});
+
+	describe('math', () => {
+		test('exports KaTeX display math from TeX annotation', () => {
+			const doc = parseHTML(`
+				<span class="katex">
+					<span class="katex-mathml">
+						<math display="block">
+							<semantics>
+								<mrow></mrow>
+								<annotation encoding="application/x-tex">f(x) = \\frac{1}{1 + e^{-x}}</annotation>
+							</semantics>
+						</math>
+					</span>
+					<span class="katex-html" aria-hidden="true">visual text</span>
+				</span>
+			`);
+			const el = doc.querySelector('.katex');
+			if (!el) throw new Error('Element not found');
+			expect(convertNodeToMarkdown(el)).toBe('$$\nf(x) = \\frac{1}{1 + e^{-x}}\n$$\n\n');
+		});
+
+		test('exports inline KaTeX math from TeX annotation', () => {
+			const doc = parseHTML(`
+				<span class="katex">
+					<span class="katex-mathml">
+						<math>
+							<semantics>
+								<mrow></mrow>
+								<annotation encoding="application/x-tex">E = mc^2</annotation>
+							</semantics>
+						</math>
+					</span>
+				</span>
+			`);
+			const el = doc.querySelector('.katex');
+			if (!el) throw new Error('Element not found');
+			expect(convertNodeToMarkdown(el)).toBe('$E = mc^2$');
+		});
+	});
+
+	describe('html blocks', () => {
+		test('preserves details and summary tags', () => {
+			const doc = parseHTML(`
+				<details>
+					<summary>Expandable section</summary>
+					<p>Body text</p>
+				</details>
+			`);
+			const el = doc.querySelector('details');
+			if (!el) throw new Error('Element not found');
+			expect(convertNodeToMarkdown(el)).toBe(
+				'<details>\n<summary>Expandable section</summary>\n\nBody text\n</details>\n\n',
+			);
 		});
 	});
 

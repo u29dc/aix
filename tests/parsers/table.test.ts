@@ -134,6 +134,33 @@ describe('formatTable', () => {
 			const result = formatTable(table, convertNodeToMarkdown);
 			expect(result).toContain('| [Link](https://example.com) |');
 		});
+
+		test('omits ChatGPT thumbnail URLs in table cells', () => {
+			const doc = parseHTML(`
+				<table>
+					<tr>
+						<th>Attribute</th>
+						<th>
+							<img
+								src="https://images.openai.com/thumbnails/url/example"
+								alt="Bush WMT0712EW 7KG 1200 Spin"
+							>
+							Bush WMT0712EW 7KG 1200 Spin£188.10•Argos
+						</th>
+					</tr>
+					<tr>
+						<td>Seen price</td>
+						<td>£188.10 at Argos</td>
+					</tr>
+				</table>
+			`);
+			const table = doc.querySelector('table');
+			if (!table) throw new Error('Element not found');
+			const result = formatTable(table, convertNodeToMarkdown);
+			expect(result).toContain('| Attribute | Bush WMT0712EW 7KG 1200 Spin£188.10•Argos |');
+			expect(result).not.toContain('images.openai.com');
+			expect(result).not.toContain('![');
+		});
 	});
 
 	describe('whitespace handling', () => {
