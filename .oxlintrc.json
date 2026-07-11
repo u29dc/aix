@@ -1,0 +1,58 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["typescript", "unicorn", "oxc", "import", "promise", "node"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error",
+		"perf": "error"
+	},
+	"options": {
+		"denyWarnings": true,
+		"maxWarnings": 0,
+		"reportUnusedDisableDirectives": "error"
+	},
+	"rules": {
+		"@typescript-eslint/no-explicit-any": "error",
+		"@typescript-eslint/no-non-null-assertion": "error",
+		"eqeqeq": "error",
+		"import/no-cycle": "error",
+		"no-console": "error",
+		"no-debugger": "error",
+		"no-var": "error",
+		"prefer-const": "error",
+		"typescript/consistent-type-imports": "error",
+		"typescript/no-unsafe-type-assertion": "off",
+		"unicorn/prefer-node-protocol": "error"
+	},
+	"overrides": [
+		{
+			"files": ["rolldown.config.ts", "commitlint.config.js", "lint-staged.config.js"],
+			"rules": {
+				"no-console": "off",
+				"no-underscore-dangle": "off"
+			}
+		},
+		{
+			"files": ["src/platforms/chatgpt.ts"],
+			"rules": {
+				"no-await-in-loop": "off"
+			}
+		},
+		{
+			"files": ["tests/**/*.ts"],
+			"rules": {
+				"typescript/await-thenable": "off"
+			}
+		}
+	],
+	"env": {
+		"browser": true,
+		"builtin": true,
+		"es6": true,
+		"node": true
+	},
+	"globals": {
+		"Bun": "readonly"
+	},
+	"ignorePatterns": ["dist", "node_modules", ".tmp", "coverage"]
+}

@@ -3,10 +3,7 @@
 		<section data-testid="conversation-turn-1" data-turn="user">
 			<div data-message-author-role="user">
 				<h4 class="sr-only">You said:</h4>
-				<div class="[overflow-wrap:anywhere] whitespace-pre-wrap">
-					Create a markdown-heavy fixture with headings, a table, checkboxes, nested lists, blockquotes,
-					and code blocks.
-				</div>
+				<div class="[overflow-wrap:anywhere] whitespace-pre-wrap">Create a markdown-heavy fixture with headings, a table, checkboxes, nested lists, blockquotes, and code blocks.</div>
 			</div>
 		</section>
 
@@ -61,23 +58,51 @@
 						<li>Export through the browser extension.</li>
 					</ol>
 					<ul>
-						<li>Parent item<ul><li>Child item<ul><li>Grandchild item</li></ul></li></ul></li>
+						<li>
+							Parent item
+							<ul>
+								<li>
+									Child item
+									<ul>
+										<li>Grandchild item</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
 						<li>Another parent item</li>
 					</ul>
-					<p>Inline math: <span class="katex"><span class="katex-mathml"><math><semantics><mrow></mrow><annotation encoding="application/x-tex">E = mc^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true">E=mc²</span></span></p>
+					<p>
+						Inline math:
+						<span class="katex"
+							><span class="katex-mathml"
+								><math
+									><semantics><mrow></mrow><annotation encoding="application/x-tex">E = mc^2</annotation></semantics></math
+								></span
+							><span class="katex-html" aria-hidden="true">E=mc²</span></span
+						>
+					</p>
 					<p>Block:</p>
-					<span class="katex"><span class="katex-mathml"><math display="block"><semantics><mrow></mrow><annotation encoding="application/x-tex">f(x) = \frac{1}{1 + e^{-x}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true">visual math</span></span>
+					<span class="katex"
+						><span class="katex-mathml"
+							><math display="block"
+								><semantics><mrow></mrow><annotation encoding="application/x-tex">f(x) = \frac{1}{1 + e^{-x}}</annotation></semantics></math
+							></span
+						><span class="katex-html" aria-hidden="true">visual math</span></span
+					>
 					<h2>HTML details block</h2>
-					&lt;details&gt;
-					&lt;summary&gt;Expandable test section&lt;/summary&gt;
+					&lt;details&gt; &lt;summary&gt;Expandable test section&lt;/summary&gt;
 					<p>This checks whether the exporter preserves HTML-looking text.</p>
 					<ul>
 						<li>Hidden bullet A</li>
 						<li>Hidden bullet B</li>
 					</ul>
 					&lt;/details&gt;
-					<pre class="overflow-visible! px-0!"><div class="sticky z-2 select-none"><div class="font-medium"><svg aria-hidden="true"></svg>Python</div><button aria-label="Copy">Copy</button><button type="button">Run</button></div><div id="code-block-viewer"><div class="cm-content q9tKkq_readonly"><span>def score_fixture(markdown: str) -&gt; dict:</span><br><span>    return {"has_table": "|" in markdown}</span></div></div></pre>
-					<pre class="overflow-visible! px-0!"><div class="sticky z-2 select-none"><div class="font-medium"><svg aria-hidden="true"></svg>Diff</div><button aria-label="Copy">Copy</button></div><div id="code-block-viewer"><div class="cm-content q9tKkq_readonly"><span>- old export parser: brittle</span><br><span>+ new export parser: preserves code lines</span></div></div></pre>
+					<pre
+						class="overflow-visible! px-0!"
+					><div class="sticky z-2 select-none"><div class="font-medium"><svg aria-hidden="true"></svg>Python</div><button aria-label="Copy">Copy</button><button type="button">Run</button></div><div id="code-block-viewer"><div class="cm-content q9tKkq_readonly"><span>def score_fixture(markdown: str) -&gt; dict:</span><br><span>    return {"has_table": "|" in markdown}</span></div></div></pre>
+					<pre
+						class="overflow-visible! px-0!"
+					><div class="sticky z-2 select-none"><div class="font-medium"><svg aria-hidden="true"></svg>Diff</div><button aria-label="Copy">Copy</button></div><div id="code-block-viewer"><div class="cm-content q9tKkq_readonly"><span>- old export parser: brittle</span><br><span>+ new export parser: preserves code lines</span></div></div></pre>
 					<p>Final plain paragraph after several Markdown structures.</p>
 				</div>
 			</div>

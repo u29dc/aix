@@ -1,4 +1,4 @@
-import type { Message, Platform } from '@/types';
+import type { Message, Platform } from "@/types";
 
 export interface PlatformConfig {
 	platform: Platform;

@@ -2,7 +2,7 @@
 
 ## 1. Documentation
 
-- Primary references: [Chrome Extensions MV3](https://developer.chrome.com/docs/extensions/mv3), [Bun docs](https://bun.sh/docs), [Biome docs](https://biomejs.dev), [tsgo](https://github.com/nicolo-ribaudo/tsgo)
+- Primary references: [Chrome Extensions MV3](https://developer.chrome.com/docs/extensions/mv3), [Bun docs](https://bun.sh/docs), [Oxc docs](https://oxc.rs/docs), [Rolldown docs](https://rolldown.rs), [tsgo](https://github.com/nicolo-ribaudo/tsgo)
 - Local source-of-truth files: [`manifest.json`](manifest.json), [`package.json`](package.json), [`src/index.ts`](src/index.ts), [`src/platforms/claude.ts`](src/platforms/claude.ts), [`src/platforms/chatgpt.ts`](src/platforms/chatgpt.ts), [`src/parsers/markdown.ts`](src/parsers/markdown.ts)
 - Regression surface: [`tests/integration/`](tests/integration/), [`tests/parsers/`](tests/parsers/), [`tests/fixtures/`](tests/fixtures/)
 - Mirror contract: `AGENTS.md` is canonical; [`CLAUDE.md`](CLAUDE.md) and [`README.md`](README.md) symlink to it
@@ -31,28 +31,32 @@
 
 ## 3. Stack
 
-| Layer | Choice | Notes |
-| --- | --- | --- |
-| Extension | Chrome Extension MV3 | one content script, no popup, no service worker |
-| Runtime | TypeScript + browser DOM | Bun bundles [`src/index.ts`](src/index.ts) for `--target browser` |
-| Targets | Claude + ChatGPT | supports `claude.ai`, `chatgpt.com`, and legacy `chat.openai.com` |
-| Testing | Bun Test + happy-dom | [`bunfig.toml`](bunfig.toml) preloads [`tests/setup.ts`](tests/setup.ts) |
-| Tooling | Biome + tsgo + Husky | lint, typecheck, commitlint, and lint-staged are local only |
-| Release build | Bun + terser | minifies [`dist/contentScript.js`](dist/contentScript.js) and strips `console` / `debugger` |
+| Layer         | Choice                        | Notes                                                                                                   |
+| ------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Extension     | Chrome Extension MV3          | one content script, no popup, no service worker                                                         |
+| Runtime       | TypeScript + browser DOM      | Rolldown bundles [`src/index.ts`](src/index.ts) as a browser IIFE                                       |
+| Targets       | Claude + ChatGPT              | supports `claude.ai`, `chatgpt.com`, and legacy `chat.openai.com`                                       |
+| Testing       | Bun Test + happy-dom          | [`bunfig.toml`](bunfig.toml) preloads [`tests/setup.ts`](tests/setup.ts)                                |
+| Tooling       | Oxfmt + Oxlint + tsgo + Husky | format, type-aware lint, typecheck, commitlint, and lint-staged are local only                          |
+| Release build | Rolldown + Oxc Minifier       | bundles and minifies [`dist/contentScript.js`](dist/contentScript.js) and strips `console` / `debugger` |
 
 ## 4. Commands
 
 - `bun install` - install dependencies and Husky hooks
-- `bun run dev` - watch-build only [`dist/contentScript.js`](dist/contentScript.js); it does not recopy [`manifest.json`](manifest.json) or [`assets/`](assets/)
+- `bun run dev` - copy the static extension payload once, then watch-build [`dist/contentScript.js`](dist/contentScript.js) with Rolldown; later manifest or asset changes still require a restart
 - `bun run build` - produce the full unpacked extension in [`dist/`](dist/) with JS, manifest, and icons
-- `bun run util:lint` - read-only Biome lint pass
+- `bun run util:format` - write-format the repository with Oxfmt using tabs, sorted imports, and the committed style config
+- `bun run util:format:check` - read-only Oxfmt verification
+- `bun run util:lint` - read-only, type-aware Oxlint pass with warnings denied
+- `bun run util:lint:fix` - apply safe Oxlint fixes, then enforce the same strict gate
 - `bun run util:types` - read-only `tsgo --noEmit`
 - `bun test --concurrent` - run unit and integration tests against fixture DOM
-- `bun run util:check` - write-enabled full gate; runs format, lint, types, and tests
+- `bun run util:check` - write-enabled full gate; runs format, lint, types, tests, and the release build
 
 ## 5. Architecture
 
 - [`src/index.ts`](src/index.ts): detects the host, injects shared styles, retries button insertion, hooks SPA navigation by patching `history.pushState` / `history.replaceState`, then executes click -> extract -> compose -> download
+- [`rolldown.config.ts`](rolldown.config.ts): owns browser/IIFE bundling, strict build warnings, production Oxc compression, top-level mangling, and release removal of `console` / `debugger`
 - [`src/platforms/types.ts`](src/platforms/types.ts): `PlatformConfig` is the only adapter contract; adapters return ordered `Message[]` plus a derived title
 - [`src/platforms/claude.ts`](src/platforms/claude.ts): only activates on `/chat/<uuid>` routes, prefers `.standard-markdown*` blocks, extracts artifact cards, reads action-bar timestamps, and backfills missing timestamps across adjacent turns
 - [`src/platforms/chatgpt.ts`](src/platforms/chatgpt.ts): accepts full conversation turns or `/c/` and `/g/` routes, deduplicates nested `.markdown` / `.whitespace-pre-wrap` blocks, and turns attached files into Markdown attachment sections
@@ -75,7 +79,7 @@
 - Use `@/` for source imports and `@tests/` for test helpers; avoid relative TypeScript imports across the repo
 - Keep selector drift in [`src/platforms/selectors.ts`](src/platforms/selectors.ts) or adapter-local extraction helpers; when a platform DOM changes, add or update fixture coverage first
 - Preserve message order and duplicates; Claude timestamp backfill and ChatGPT chunk deduplication are intentional export behaviors
-- Avoid depending on console output for debugging outcomes; existing debug logs are tolerated in source but removed from release builds by terser
+- Do not commit `console` or `debugger` statements; Oxlint rejects them and the Oxc minifier removes them as a release backstop
 - Commit messages must satisfy [`commitlint.config.js`](commitlint.config.js): types `feat|fix|refactor|docs|style|chore|test`, scopes `extension|parser|ui|platform|build|deps|docs`
 
 ## 8. Constraints
@@ -89,9 +93,9 @@
 
 ## 9. Validation
 
-- Read-only completion gate: `bun run util:lint`, `bun run util:types`, `bun test --concurrent`
+- Read-only completion gate: `bun run util:format:check`, `bun run util:lint`, `bun run util:types`, `bun test --concurrent`
 - Build gate when changing shipped code, icons, or manifest: `bun run build`
-- Use `bun run util:check` only when you want the repo reformatted as part of the change; it runs [`util:format`](package.json) before lint, types, and tests
+- Use `bun run util:check` only when you want the repo reformatted as part of the change; it runs [`util:format`](package.json) before lint, types, tests, and the release build
 - If you change [`src/platforms/`](src/platforms/) or parser behavior, update fixture-backed coverage in [`tests/integration/`](tests/integration/) or [`tests/parsers/`](tests/parsers/) and keep [`tests/fixtures/`](tests/fixtures/) aligned with the new DOM assumptions
 - Manual smoke for platform changes: load [`dist/`](dist/) as an unpacked extension, verify the button appears exactly once on one Claude `/chat/<uuid>` page and one ChatGPT `/c/...` or `/g/...` page, then confirm the exported markdown preserves order, code blocks, lists, tables, and attachment or artifact sections
 - No CI or GitHub workflow is present in the repository; local validation is the completion bar

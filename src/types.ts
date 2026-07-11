@@ -1,7 +1,7 @@
-export type Platform = 'claude' | 'chatgpt';
+export type Platform = "claude" | "chatgpt";
 
 export interface Message {
-	role: 'user' | 'assistant';
+	role: "user" | "assistant";
 	markdown: string;
 	timestamp?: string;
 }
@@ -11,5 +11,5 @@ export interface ConversionContext {
 }
 
 export interface ToastElement extends HTMLDivElement {
-	__hideTimer?: ReturnType<typeof setTimeout>;
+	hideTimer?: ReturnType<typeof setTimeout>;
 }

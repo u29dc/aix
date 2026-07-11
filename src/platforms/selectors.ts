@@ -12,37 +12,34 @@ export interface SelectorConfig {
 export const CLAUDE_SELECTORS = {
 	userMessage: {
 		primary: '[data-testid="user-message"]',
-		fallbacks: ['[data-testid*="human"]', '.human-message', '[class*="user-message"]'],
+		fallbacks: ['[data-testid*="human"]', ".human-message", '[class*="user-message"]'],
 	},
 	assistantMessage: {
-		primary: 'div[data-is-streaming]',
-		fallbacks: ['[data-testid*="assistant"]', '.assistant-message', '[class*="claude-response"]'],
+		primary: "div[data-is-streaming]",
+		fallbacks: ['[data-testid*="assistant"]', ".assistant-message", '[class*="claude-response"]'],
 	},
 	messageContent: {
-		primary: '.font-claude-response .standard-markdown',
+		primary: ".font-claude-response .standard-markdown",
 		fallbacks: [
-			'.font-claude-response .standard-markdown_',
-			'.font-claude-response .progressive-markdown',
-			'.font-claude-response .progressive-markdown_',
-			'.font-claude-response',
-			'.markdown',
-			'.prose',
+			".font-claude-response .standard-markdown_",
+			".font-claude-response .progressive-markdown",
+			".font-claude-response .progressive-markdown_",
+			".font-claude-response",
+			".markdown",
+			".prose",
 		],
 	},
 	chatContainer: {
-		primary: 'main',
-		fallbacks: ['[data-testid="chat-main"]', '[role="main"]', '#main'],
+		primary: "main",
+		fallbacks: ['[data-testid="chat-main"]', '[role="main"]', "#main"],
 	},
 	chatActions: {
 		primary: '[data-testid="chat-actions"]',
-		fallbacks: [
-			'[data-testid="page-header"] [data-testid="chat-actions"]',
-			'[class*="chat-actions"]',
-		],
+		fallbacks: ['[data-testid="page-header"] [data-testid="chat-actions"]', '[class*="chat-actions"]'],
 	},
 	chatTitle: {
 		primary: '[data-testid="chat-title-button"]',
-		fallbacks: ['[data-testid*="title"]', 'h1', '[class*="chat-title"]'],
+		fallbacks: ['[data-testid*="title"]', "h1", '[class*="chat-title"]'],
 	},
 } as const;
 
@@ -52,13 +49,10 @@ export const CLAUDE_SELECTORS = {
 export const CHATGPT_SELECTORS = {
 	conversationTurn: {
 		primary: '[data-testid^="conversation-turn"]',
-		fallbacks: [
-			'section[data-testid^="conversation-turn"]',
-			'article[data-testid^="conversation-turn"]',
-		],
+		fallbacks: ['section[data-testid^="conversation-turn"]', 'article[data-testid^="conversation-turn"]'],
 	},
 	message: {
-		primary: '[data-message-author-role]',
+		primary: "[data-message-author-role]",
 		fallbacks: ['[data-message-author-role="user"]', '[data-message-author-role="assistant"]'],
 	},
 	userMessage: {
@@ -67,18 +61,15 @@ export const CHATGPT_SELECTORS = {
 	},
 	assistantMessage: {
 		primary: '[data-message-author-role="assistant"]',
-		fallbacks: [
-			'[data-turn="assistant"] [data-message-author-role="assistant"]',
-			'[data-turn="assistant"]',
-		],
+		fallbacks: ['[data-turn="assistant"] [data-message-author-role="assistant"]', '[data-turn="assistant"]'],
 	},
 	messageContent: {
-		primary: '.markdown',
-		fallbacks: ['[data-message-content]', '.whitespace-pre-wrap', '.prose'],
+		primary: ".markdown",
+		fallbacks: ["[data-message-content]", ".whitespace-pre-wrap", ".prose"],
 	},
 	chatContainer: {
-		primary: 'main',
-		fallbacks: ['[role="main"]', '#main'],
+		primary: "main",
+		fallbacks: ['[role="main"]', "#main"],
 	},
 } as const;
 
@@ -116,5 +107,5 @@ export function querySelectorAll(root: Element | Document, config: SelectorConfi
  * Build a combined selector string from config for use with querySelectorAll
  */
 export function buildCombinedSelector(config: SelectorConfig): string {
-	return [config.primary, ...config.fallbacks].join(', ');
+	return [config.primary, ...config.fallbacks].join(", ");
 }

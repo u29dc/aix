@@ -1,11 +1,11 @@
-import { BUTTON_ID } from '@/constants';
-import { composeMarkdown } from '@/parsers';
-import { detectPlatform, getPlatformAdapter } from '@/platforms';
-import type { PlatformConfig } from '@/platforms/types';
-import { getButton, removeButton, setButtonBusy, setButtonIdle } from '@/ui/button';
-import { injectStyles } from '@/ui/styles';
-import { showToast } from '@/ui/toast';
-import { buildFilename, observeSpaNavigation, triggerDownload } from '@/utils';
+import { BUTTON_ID } from "@/constants";
+import { composeMarkdown } from "@/parsers";
+import { detectPlatform, getPlatformAdapter } from "@/platforms";
+import type { PlatformConfig } from "@/platforms/types";
+import { getButton, removeButton, setButtonBusy, setButtonIdle } from "@/ui/button";
+import { injectStyles } from "@/ui/styles";
+import { showToast } from "@/ui/toast";
+import { buildFilename, observeSpaNavigation, triggerDownload } from "@/utils";
 
 let navigationHooked = false;
 let adapter: PlatformConfig | null = null;
@@ -31,26 +31,22 @@ function bootstrap(): void {
  * Ensure the export button exists (with retry)
  */
 function ensureButton(): boolean {
-	console.log('[AIX] ensureButton called, adapter:', !!adapter);
 	if (!adapter) return false;
 
 	const isEligible = adapter.isEligibleConversation();
-	console.log('[AIX] isEligibleConversation:', isEligible, 'pathname:', window.location.pathname);
 	if (!isEligible) {
 		removeButton();
 		return false;
 	}
 
 	const existing = document.getElementById(BUTTON_ID);
-	console.log('[AIX] existing button:', existing, 'isConnected:', existing?.isConnected);
 	if (existing?.isConnected) return true;
 
 	const success = adapter.ensureButton();
-	console.log('[AIX] adapter.ensureButton() result:', success);
 	if (success) {
 		const button = getButton();
 		if (button) {
-			button.addEventListener('click', handleExportClick);
+			button.addEventListener("click", handleExportClick);
 		}
 	}
 	return success;
@@ -79,17 +75,12 @@ function ensureButtonWithRetry(maxRetries = 6, delay = 150): void {
 function handleExportClick(): void {
 	const button = getButton();
 	if (!button) return;
-	if (button.dataset.state === 'busy') return;
+	if (button.dataset.state === "busy") return;
 
 	setButtonBusy(button);
 
-	Promise.resolve()
-		.then(() => exportConversation())
-		.then((filename) => {
-			if (filename) {
-				showToast(`Conversation exported: ${filename}`, false);
-			}
-		})
+	void exportConversation()
+		.then((filename) => showToast(`Conversation exported: ${filename}`, false))
 		.catch((error: Error) => {
 			showToast(`Export failed: ${error.message}`, true);
 		})
@@ -106,23 +97,17 @@ function handleExportClick(): void {
  */
 async function exportConversation(): Promise<string> {
 	if (!adapter) {
-		throw new Error('No platform adapter available');
+		throw new Error("No platform adapter available");
 	}
 
 	const preparedMessages = await adapter.prepareForExport?.();
 	const messages = preparedMessages ?? adapter.extractConversation();
 	if (!messages.length) {
-		throw new Error('No messages found in this conversation.');
+		throw new Error("No messages found in this conversation.");
 	}
 
-	const title = adapter.deriveTitle() || 'AI Conversation';
-	const markdown = composeMarkdown(
-		messages,
-		title,
-		adapter.platform,
-		adapter.displayName,
-		window.location.href,
-	);
+	const title = adapter.deriveTitle() || "AI Conversation";
+	const markdown = composeMarkdown(messages, title, adapter.platform, adapter.displayName, window.location.href);
 	const filename = buildFilename(title, adapter.platform);
 
 	triggerDownload(markdown, filename);
@@ -131,11 +116,8 @@ async function exportConversation(): Promise<string> {
 
 // Initialize extension
 const platform = detectPlatform();
-console.log('[AIX] Platform detected:', platform);
 if (platform) {
 	adapter = getPlatformAdapter(platform);
 	injectStyles();
 	bootstrap();
-} else {
-	console.log('[AIX] No platform detected, extension inactive');
 }

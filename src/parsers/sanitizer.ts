@@ -1,4 +1,4 @@
-import { SANITIZE_SELECTORS } from '@/constants';
+import { SANITIZE_SELECTORS } from "@/constants";
 
 /**
  * Default selectors for elements that should be removed during sanitization
@@ -24,7 +24,7 @@ export function sanitizeElement(element: Element, options: SanitizeOptions = {})
 
 	const selectors = removeSelectors.filter((selector) => selector.length > 0);
 	if (selectors.length > 0) {
-		const elements = clone.querySelectorAll(selectors.join(', '));
+		const elements = clone.querySelectorAll(selectors.join(", "));
 		for (const el of Array.from(elements)) {
 			el.remove();
 		}
@@ -48,8 +48,8 @@ function removeEmptyTextNodes(element: Element): void {
 
 	while (node) {
 		const parent = node.parentElement;
-		const inCodeBlock = parent?.closest('pre, code') !== null;
-		if (!inCodeBlock && node.textContent?.trim() === '') {
+		const inCodeBlock = parent?.closest("pre, code") !== null;
+		if (!inCodeBlock && node.textContent?.trim() === "") {
 			nodesToRemove.push(node);
 		}
 		node = walker.nextNode();
@@ -65,11 +65,11 @@ function removeEmptyTextNodes(element: Element): void {
  */
 export function normalizeWhitespace(text: string): string {
 	return text
-		.replace(/\r\n/g, '\n')
-		.replace(/\r/g, '\n')
-		.replace(/[ \t]+/g, ' ')
-		.replace(/\n[ \t]+/g, '\n')
-		.replace(/[ \t]+\n/g, '\n')
+		.replace(/\r\n/g, "\n")
+		.replace(/\r/g, "\n")
+		.replace(/[ \t]+/g, " ")
+		.replace(/\n[ \t]+/g, "\n")
+		.replace(/[ \t]+\n/g, "\n")
 		.trim();
 }
 
@@ -77,11 +77,9 @@ export function normalizeWhitespace(text: string): string {
  * Check if an element should be considered empty
  */
 export function isEmptyElement(element: Element): boolean {
-	const text = element.textContent?.trim() ?? '';
+	const text = element.textContent?.trim() ?? "";
 	if (text) return false;
 
-	const hasVisibleChildren = element.querySelector(
-		'img, video, audio, iframe, canvas, object, embed',
-	);
+	const hasVisibleChildren = element.querySelector("img, video, audio, iframe, canvas, object, embed");
 	return !hasVisibleChildren;
 }

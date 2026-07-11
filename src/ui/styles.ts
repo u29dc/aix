@@ -1,4 +1,4 @@
-import { STYLE_ID, TOAST_ID } from '@/constants';
+import { STYLE_ID, TOAST_ID } from "@/constants";
 
 /**
  * Inject extension styles into the page
@@ -6,8 +6,8 @@ import { STYLE_ID, TOAST_ID } from '@/constants';
 export function injectStyles(): void {
 	if (document.getElementById(STYLE_ID)) return;
 
-	const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-	const style = document.createElement('style');
+	const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+	const style = document.createElement("style");
 	style.id = STYLE_ID;
 	style.textContent = `
     #${TOAST_ID} {
@@ -19,7 +19,7 @@ export function injectStyles(): void {
       border-radius: 12px;
       font-size: 13px;
       font-weight: 500;
-      color: ${prefersDark ? '#0f172a' : '#0f172a'};
+      color: ${prefersDark ? "#0f172a" : "#0f172a"};
       background: rgba(255, 255, 255, 0.9);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       opacity: 0;

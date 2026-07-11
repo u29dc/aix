@@ -1,140 +1,126 @@
-import { describe, expect, test } from 'bun:test';
-import { createElement, createList, parseHTML } from '@tests/helpers';
-import { formatList } from '@/parsers/list';
-import { convertNodeToMarkdown } from '@/parsers/markdown';
+import { describe, expect, test } from "bun:test";
 
-describe('formatList', () => {
+import { createElement, createList, parseHTML } from "@tests/helpers";
+
+import { formatList } from "@/parsers/list";
+import { convertNodeToMarkdown } from "@/parsers/markdown";
+
+describe("formatList", () => {
 	const defaultContext = { listDepth: 0 };
 
-	describe('unordered lists', () => {
-		test('formats basic unordered list with dash prefix', () => {
-			const el = createList(['Apple', 'Banana', 'Cherry']);
+	describe("unordered lists", () => {
+		test("formats basic unordered list with dash prefix", () => {
+			const el = createList(["Apple", "Banana", "Cherry"]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toBe('- Apple\n- Banana\n- Cherry\n\n');
+			expect(result).toBe("- Apple\n- Banana\n- Cherry\n\n");
 		});
 
-		test('handles single item list', () => {
-			const el = createList(['Only item']);
+		test("handles single item list", () => {
+			const el = createList(["Only item"]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toBe('- Only item\n\n');
+			expect(result).toBe("- Only item\n\n");
 		});
 
-		test('handles empty list', () => {
-			const el = createElement('ul');
+		test("handles empty list", () => {
+			const el = createElement("ul");
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toBe('');
+			expect(result).toBe("");
 		});
 
-		test('handles list item with whitespace', () => {
-			const el = createList(['  trimmed  ']);
+		test("handles list item with whitespace", () => {
+			const el = createList(["  trimmed  "]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toBe('- trimmed\n\n');
+			expect(result).toBe("- trimmed\n\n");
 		});
 	});
 
-	describe('ordered lists', () => {
-		test('formats basic ordered list with numbered prefix', () => {
-			const el = createList(['First', 'Second', 'Third'], true);
+	describe("ordered lists", () => {
+		test("formats basic ordered list with numbered prefix", () => {
+			const el = createList(["First", "Second", "Third"], true);
 			const result = formatList(el, defaultContext, true, convertNodeToMarkdown);
-			expect(result).toBe('1. First\n2. Second\n3. Third\n\n');
+			expect(result).toBe("1. First\n2. Second\n3. Third\n\n");
 		});
 
-		test('respects start attribute', () => {
-			const el = createList(['Item A', 'Item B'], true, 10);
+		test("respects start attribute", () => {
+			const el = createList(["Item A", "Item B"], true, 10);
 			const result = formatList(el, defaultContext, true, convertNodeToMarkdown);
-			expect(result).toBe('10. Item A\n11. Item B\n\n');
+			expect(result).toBe("10. Item A\n11. Item B\n\n");
 		});
 
-		test('handles single item ordered list', () => {
-			const el = createList(['Solo'], true);
+		test("handles single item ordered list", () => {
+			const el = createList(["Solo"], true);
 			const result = formatList(el, defaultContext, true, convertNodeToMarkdown);
-			expect(result).toBe('1. Solo\n\n');
+			expect(result).toBe("1. Solo\n\n");
 		});
 	});
 
-	describe('nested lists', () => {
-		test('indents nested unordered list with 2 spaces', () => {
-			const el = createList([
-				{ text: 'Parent', children: [{ text: 'Child 1' }, { text: 'Child 2' }] },
-			]);
+	describe("nested lists", () => {
+		test("indents nested unordered list with 2 spaces", () => {
+			const el = createList([{ text: "Parent", children: [{ text: "Child 1" }, { text: "Child 2" }] }]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toBe('- Parent\n  - Child 1\n  - Child 2\n\n');
+			expect(result).toBe("- Parent\n  - Child 1\n  - Child 2\n\n");
 		});
 
-		test('handles 3 levels of nesting', () => {
+		test("handles 3 levels of nesting", () => {
 			const el = createList([
 				{
-					text: 'Level 1',
+					text: "Level 1",
 					children: [
 						{
-							text: 'Level 2',
-							children: [{ text: 'Level 3' }],
+							text: "Level 2",
+							children: [{ text: "Level 3" }],
 						},
 					],
 				},
 			]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toBe('- Level 1\n  - Level 2\n    - Level 3\n\n');
+			expect(result).toBe("- Level 1\n  - Level 2\n    - Level 3\n\n");
 		});
 
-		test('handles mixed ul/ol nesting', () => {
+		test("handles mixed ul/ol nesting", () => {
 			const el = createList([
 				{
-					text: 'Unordered parent',
-					children: [{ text: 'Ordered child 1' }, { text: 'Ordered child 2' }],
+					text: "Unordered parent",
+					children: [{ text: "Ordered child 1" }, { text: "Ordered child 2" }],
 					ordered: true,
 				},
 			]);
 			const result = formatList(el, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toBe('- Unordered parent\n  1. Ordered child 1\n  2. Ordered child 2\n\n');
+			expect(result).toBe("- Unordered parent\n  1. Ordered child 1\n  2. Ordered child 2\n\n");
 		});
 	});
 
-	describe('list items with complex content', () => {
-		test('handles list item with inline formatting', () => {
-			const li = createElement('li', undefined, [
-				'Text with ',
-				createElement('strong', undefined, ['bold']),
-				' and ',
-				createElement('em', undefined, ['italic']),
-			]);
-			const ul = createElement('ul', undefined, [li]);
+	describe("list items with complex content", () => {
+		test("handles list item with inline formatting", () => {
+			const li = createElement("li", undefined, ["Text with ", createElement("strong", undefined, ["bold"]), " and ", createElement("em", undefined, ["italic"])]);
+			const ul = createElement("ul", undefined, [li]);
 			const result = formatList(ul, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toContain('- Text with **bold** and *italic*');
+			expect(result).toContain("- Text with **bold** and *italic*");
 		});
 
-		test('handles list item with inline code', () => {
-			const li = createElement('li', undefined, [
-				'Use ',
-				createElement('code', undefined, ['npm install']),
-			]);
-			const ul = createElement('ul', undefined, [li]);
+		test("handles list item with inline code", () => {
+			const li = createElement("li", undefined, ["Use ", createElement("code", undefined, ["npm install"])]);
+			const ul = createElement("ul", undefined, [li]);
 			const result = formatList(ul, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toContain('- Use `npm install`');
+			expect(result).toContain("- Use `npm install`");
 		});
 
-		test('handles list item with link', () => {
-			const li = createElement('li', undefined, [
-				'Visit ',
-				createElement('a', { href: 'https://example.com' }, ['Example']),
-			]);
-			const ul = createElement('ul', undefined, [li]);
+		test("handles list item with link", () => {
+			const li = createElement("li", undefined, ["Visit ", createElement("a", { href: "https://example.com" }, ["Example"])]);
+			const ul = createElement("ul", undefined, [li]);
 			const result = formatList(ul, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toContain('- Visit [Example](https://example.com)');
+			expect(result).toContain("- Visit [Example](https://example.com)");
 		});
 	});
 
-	describe('edge cases', () => {
-		test('ignores non-li children', () => {
-			const ul = createElement('ul', undefined, [
-				createElement('div', undefined, ['Not a list item']),
-				createElement('li', undefined, ['Real item']),
-			]);
+	describe("edge cases", () => {
+		test("ignores non-li children", () => {
+			const ul = createElement("ul", undefined, [createElement("div", undefined, ["Not a list item"]), createElement("li", undefined, ["Real item"])]);
 			const result = formatList(ul, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toBe('- Real item\n\n');
+			expect(result).toBe("- Real item\n\n");
 		});
 
-		test('handles list from HTML fixture', () => {
+		test("handles list from HTML fixture", () => {
 			const doc = parseHTML(`
 				<ul class="list-disc">
 					<li>First</li>
@@ -142,12 +128,12 @@ describe('formatList', () => {
 					<li>Third</li>
 				</ul>
 			`);
-			const ul = doc.querySelector('ul');
-			if (!ul) throw new Error('Element not found');
+			const ul = doc.querySelector("ul");
+			if (!ul) throw new Error("Element not found");
 			const result = formatList(ul, defaultContext, false, convertNodeToMarkdown);
-			expect(result).toContain('- First');
-			expect(result).toContain('- Second');
-			expect(result).toContain('- Third');
+			expect(result).toContain("- First");
+			expect(result).toContain("- Second");
+			expect(result).toContain("- Third");
 		});
 	});
 });

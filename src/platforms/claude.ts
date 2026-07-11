@@ -1,11 +1,11 @@
-import { BUTTON_ID, CLAUDE_SHARE_CLASS_FALLBACK, SANITIZE_SELECTORS } from '@/constants';
-import { convertNodeToMarkdown } from '@/parsers';
-import { sanitizeElement } from '@/parsers/sanitizer';
-import { buildCombinedSelector, CLAUDE_SELECTORS, querySelector } from '@/platforms/selectors';
-import type { PlatformConfig } from '@/platforms/types';
-import type { Message } from '@/types';
-import { createButton } from '@/ui/button';
-import { escapeMarkdown } from '@/utils/markdown';
+import { BUTTON_ID, CLAUDE_SHARE_CLASS_FALLBACK, SANITIZE_SELECTORS } from "@/constants";
+import { convertNodeToMarkdown } from "@/parsers";
+import { sanitizeElement } from "@/parsers/sanitizer";
+import { buildCombinedSelector, CLAUDE_SELECTORS, querySelector } from "@/platforms/selectors";
+import type { PlatformConfig } from "@/platforms/types";
+import type { Message } from "@/types";
+import { createButton } from "@/ui/button";
+import { escapeMarkdown } from "@/utils/markdown";
 
 /**
  * Check if current page is an eligible Claude conversation
@@ -38,7 +38,6 @@ export function ensureClaudeButton(): boolean {
 		box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
 	`;
 	document.body.appendChild(button);
-	console.log('[AIX] Button injected as fixed overlay');
 	return true;
 }
 
@@ -61,8 +60,8 @@ function getMessageSource(node: Element, isUser: boolean): Element {
  * Check if a message is currently streaming
  */
 function isStreamingMessage(node: Element): boolean {
-	const streamingContainer = node.closest('[data-is-streaming]');
-	return streamingContainer?.getAttribute('data-is-streaming') === 'true';
+	const streamingContainer = node.closest("[data-is-streaming]");
+	return streamingContainer?.getAttribute("data-is-streaming") === "true";
 }
 
 /**
@@ -71,19 +70,12 @@ function isStreamingMessage(node: Element): boolean {
 const USER_SELECTOR = buildCombinedSelector(CLAUDE_SELECTORS.userMessage);
 const ASSISTANT_SELECTOR = buildCombinedSelector(CLAUDE_SELECTORS.assistantMessage);
 const MESSAGE_SELECTOR = `${USER_SELECTOR}, ${ASSISTANT_SELECTOR}`;
-const MARKDOWN_BLOCK_SELECTORS = [
-	'.standard-markdown',
-	'.standard-markdown_',
-	'.progressive-markdown',
-	'.progressive-markdown_',
-	'.markdown',
-	'.prose',
-].join(', ');
+const MARKDOWN_BLOCK_SELECTORS = [".standard-markdown", ".standard-markdown_", ".progressive-markdown", ".progressive-markdown_", ".markdown", ".prose"].join(", ");
 const LEGACY_ARTIFACT_CARD_SELECTOR = '[aria-label="Preview contents"]';
 const ARTIFACT_BUTTON_SELECTOR = 'button[aria-label*="Open artifact"]';
 const FILE_THUMBNAIL_SELECTOR = '[data-testid="file-thumbnail"]';
 const MESSAGE_ACTIONS_SELECTOR = '[aria-label="Message actions"]';
-const THINKING_STATUS_SELECTOR = 'button[aria-expanded]';
+const THINKING_STATUS_SELECTOR = "button[aria-expanded]";
 const COLLAPSED_THINKING_SELECTOR = `${CLAUDE_SELECTORS.assistantMessage.primary} ${THINKING_STATUS_SELECTOR}[aria-expanded="false"]`;
 
 function isSystemMessage(node: Element): boolean {
@@ -91,39 +83,35 @@ function isSystemMessage(node: Element): boolean {
 }
 
 function normalizeInlineText(value: string): string {
-	return value.replace(/\s+/g, ' ').trim();
+	return value.replace(/\s+/g, " ").trim();
 }
 
 function looksLikeTimestamp(value: string): boolean {
 	if (!value) return false;
 	return (
 		/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i.test(value) ||
-		/^\d{4}-\d{2}-\d{2}(?:[t\s]\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?(?:z|[+-]\d{2}:?\d{2})?)?$/i.test(
-			value,
-		) ||
+		/^\d{4}-\d{2}-\d{2}(?:[t\s]\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?(?:z|[+-]\d{2}:?\d{2})?)?$/i.test(value) ||
 		/\b\d{1,2}:\d{2}(?:\s?[ap]m)?\b/i.test(value) ||
 		/^(today|yesterday)$/i.test(value)
 	);
 }
 
 function extractMessageTimestamp(node: Element): string | undefined {
-	const wrapper = node.closest('[data-test-render-count]') ?? node.parentElement;
+	const wrapper = node.closest("[data-test-render-count]") ?? node.parentElement;
 	if (!wrapper) return undefined;
 
 	const actions = wrapper.querySelector(MESSAGE_ACTIONS_SELECTOR);
 	if (!actions) return undefined;
 
-	const dateTimeAttr = normalizeInlineText(
-		actions.querySelector('time[datetime]')?.getAttribute('datetime') ?? '',
-	);
+	const dateTimeAttr = normalizeInlineText(actions.querySelector("time[datetime]")?.getAttribute("datetime") ?? "");
 	if (dateTimeAttr) return dateTimeAttr;
 
-	const timeText = normalizeInlineText(actions.querySelector('time')?.textContent ?? '');
+	const timeText = normalizeInlineText(actions.querySelector("time")?.textContent ?? "");
 	if (looksLikeTimestamp(timeText)) return timeText;
 
-	const spans = Array.from(actions.querySelectorAll('span'));
+	const spans = Array.from(actions.querySelectorAll("span"));
 	for (const span of spans) {
-		const text = normalizeInlineText(span.textContent ?? '');
+		const text = normalizeInlineText(span.textContent ?? "");
 		if (looksLikeTimestamp(text)) return text;
 	}
 
@@ -169,15 +157,13 @@ function uniqueStrings(values: string[]): string[] {
 }
 
 function selectInnermost(elements: Element[]): Element[] {
-	return elements.filter(
-		(element) => !elements.some((other) => other !== element && element.contains(other)),
-	);
+	return elements.filter((element) => !elements.some((other) => other !== element && element.contains(other)));
 }
 
 function isWithinThinkingPanel(element: Element): boolean {
 	for (let current: Element | null = element; current; current = current.parentElement) {
-		if (!current.classList.contains('overflow-hidden')) continue;
-		const section = current.closest('.min-w-0.pl-2.py-1\\.5');
+		if (!current.classList.contains("overflow-hidden")) continue;
+		const section = current.closest(".min-w-0.pl-2.py-1\\.5");
 		if (section?.querySelector(THINKING_STATUS_SELECTOR)) return true;
 	}
 
@@ -185,23 +171,17 @@ function isWithinThinkingPanel(element: Element): boolean {
 }
 
 function collectMarkdownBlocks(node: Element): Element[] {
-	const blocks = Array.from(node.querySelectorAll(MARKDOWN_BLOCK_SELECTORS)).filter(
-		(block) => !isWithinThinkingPanel(block),
-	);
+	const blocks = Array.from(node.querySelectorAll(MARKDOWN_BLOCK_SELECTORS)).filter((block) => !isWithinThinkingPanel(block));
 	if (blocks.length === 0) return [];
-	const standardBlocks = blocks.filter(
-		(block) =>
-			block.classList.contains('standard-markdown') ||
-			block.classList.contains('standard-markdown_'),
-	);
+	const standardBlocks = blocks.filter((block) => block.classList.contains("standard-markdown") || block.classList.contains("standard-markdown_"));
 	const preferred = standardBlocks.length > 0 ? standardBlocks : blocks;
 	return selectInnermost(preferred);
 }
 
 function formatListSection(label: string, entries: string[]): string {
-	if (entries.length === 0) return '';
+	if (entries.length === 0) return "";
 	const lines = [`**${label}:**`, ...entries.map((entry) => `- ${entry}`)];
-	return lines.join('\n');
+	return lines.join("\n");
 }
 
 function collectLeafTexts(card: Element): string[] {
@@ -212,11 +192,11 @@ function collectLeafTexts(card: Element): string[] {
 	while (current) {
 		const element = current as Element;
 		const isLeafElement = element.childElementCount === 0;
-		const isNotButton = !element.closest('button');
-		const isNotSvg = element.tagName.toLowerCase() !== 'svg';
+		const isNotButton = !element.closest("button");
+		const isNotSvg = element.tagName.toLowerCase() !== "svg";
 
 		if (isLeafElement && isNotButton && isNotSvg) {
-			const text = normalizeInlineText(element.textContent ?? '');
+			const text = normalizeInlineText(element.textContent ?? "");
 			if (text) leafTexts.push(text);
 		}
 		current = walker.nextNode();
@@ -227,13 +207,13 @@ function collectLeafTexts(card: Element): string[] {
 
 function extractCardTitleAndMeta(card: Element): { title: string; meta: string } {
 	const clamped = Array.from(card.querySelectorAll('[class*="line-clamp-"]'));
-	const clampedTitle = normalizeInlineText(clamped[0]?.textContent ?? '');
-	const clampedMeta = normalizeInlineText(clamped[1]?.textContent ?? '');
+	const clampedTitle = normalizeInlineText(clamped[0]?.textContent ?? "");
+	const clampedMeta = normalizeInlineText(clamped[1]?.textContent ?? "");
 
 	if (clampedTitle) return { title: clampedTitle, meta: clampedMeta };
 
 	const leafTexts = collectLeafTexts(card);
-	const [fallbackTitle = '', fallbackMeta = ''] = uniqueStrings(leafTexts);
+	const [fallbackTitle = "", fallbackMeta = ""] = uniqueStrings(leafTexts);
 	return { title: fallbackTitle, meta: fallbackMeta };
 }
 
@@ -243,12 +223,12 @@ function formatArtifactEntry(title: string, meta: string): string {
 }
 
 function extractArtifactLabel(button: Element): string {
-	const ariaLabel = normalizeInlineText(button.getAttribute('aria-label') ?? '');
-	if (!ariaLabel) return '';
+	const ariaLabel = normalizeInlineText(button.getAttribute("aria-label") ?? "");
+	if (!ariaLabel) return "";
 
 	return ariaLabel
-		.replace(/\.\s*open artifact\.?$/i, '')
-		.replace(/\s+open artifact\.?$/i, '')
+		.replace(/\.\s*open artifact\.?$/i, "")
+		.replace(/\s+open artifact\.?$/i, "")
 		.trim();
 }
 
@@ -275,12 +255,10 @@ function extractArtifactEntries(node: Element): string[] {
 function extractThinkingSummaries(node: Element): string[] {
 	const summaries = Array.from(node.querySelectorAll(THINKING_STATUS_SELECTOR))
 		.map((button) => {
-			const buttonText = normalizeInlineText(button.textContent ?? '');
+			const buttonText = normalizeInlineText(button.textContent ?? "");
 			if (buttonText) return buttonText;
 
-			const statusText = normalizeInlineText(
-				button.parentElement?.querySelector('[role="status"]')?.textContent ?? '',
-			);
+			const statusText = normalizeInlineText(button.parentElement?.querySelector('[role="status"]')?.textContent ?? "");
 			return statusText;
 		})
 		.filter((summary) => summary.length > 0);
@@ -289,11 +267,11 @@ function extractThinkingSummaries(node: Element): string[] {
 }
 
 function stripThinkingOnlyNodes(root: Element): void {
-	for (const image of Array.from(root.querySelectorAll('img, picture, source'))) {
+	for (const image of Array.from(root.querySelectorAll("img, picture, source"))) {
 		image.remove();
 	}
 
-	for (const link of Array.from(root.querySelectorAll('a'))) {
+	for (const link of Array.from(root.querySelectorAll("a"))) {
 		link.remove();
 	}
 }
@@ -303,34 +281,29 @@ function cleanThinkingMarkdown(markdown: string): string {
 		.split(/\n{2,}/)
 		.map((paragraph) =>
 			paragraph
-				.replace(/!\[[^\]]*]\([^)]+\)/g, '')
-				.replace(/\[[^\]]+]\([^)]+\)/g, '')
-				.replace(/(?:^|\s)Done\.?(?=$|\s)/g, ' ')
-				.replace(/[ \t]+\n/g, '\n')
-				.replace(/\n{3,}/g, '\n\n')
+				.replace(/!\[[^\]]*]\([^)]+\)/g, "")
+				.replace(/\[[^\]]+]\([^)]+\)/g, "")
+				.replace(/(?:^|\s)Done\.?(?=$|\s)/g, " ")
+				.replace(/[ \t]+\n/g, "\n")
+				.replace(/\n{3,}/g, "\n\n")
 				.trim(),
 		)
 		.filter((paragraph) => paragraph.length > 0 && !/^Done\.?$/i.test(paragraph));
 
-	return uniqueStrings(paragraphs).join('\n\n');
+	return uniqueStrings(paragraphs).join("\n\n");
 }
 
 function extractExpandedThinkingDetails(node: Element): string[] {
 	const details: string[] = [];
 
 	for (const button of Array.from(node.querySelectorAll(THINKING_STATUS_SELECTOR))) {
-		const section = button.closest('.min-w-0.pl-2.py-1\\.5') ?? button.parentElement?.parentElement;
+		const section = button.closest(".min-w-0.pl-2.py-1\\.5") ?? button.parentElement?.parentElement;
 		if (!section) continue;
 
-		const panel = Array.from(section.children).find(
-			(child) =>
-				child !== button &&
-				!child.matches('[role="status"]') &&
-				child.querySelector('.overflow-hidden') !== null,
-		);
+		const panel = Array.from(section.children).find((child) => child !== button && !child.matches('[role="status"]') && child.querySelector(".overflow-hidden") !== null);
 		if (!panel) continue;
 
-		const contentRoot = panel.querySelector('.overflow-hidden');
+		const contentRoot = panel.querySelector(".overflow-hidden");
 		if (!contentRoot) continue;
 
 		const sanitized = sanitizeElement(contentRoot, {
@@ -373,16 +346,16 @@ export async function prepareClaudeConversationForExport(): Promise<Message[] | 
 
 function parseAttachmentAriaLabel(label: string): { title: string; meta: string } {
 	const parts = label
-		.split(',')
+		.split(",")
 		.map((part) => normalizeInlineText(part))
 		.filter((part) => part.length > 0);
 
-	const [title = '', ...metaParts] = parts;
-	return { title, meta: metaParts.join(', ') };
+	const [title = "", ...metaParts] = parts;
+	return { title, meta: metaParts.join(", ") };
 }
 
 function extractUserAttachments(node: Element): string[] {
-	const wrapper = node.closest('[data-test-render-count]');
+	const wrapper = node.closest("[data-test-render-count]");
 	if (!wrapper) return [];
 
 	const thumbnails = Array.from(wrapper.querySelectorAll(FILE_THUMBNAIL_SELECTOR));
@@ -390,19 +363,17 @@ function extractUserAttachments(node: Element): string[] {
 
 	const entries = thumbnails
 		.map((thumb) => {
-			const button = thumb.querySelector('button[aria-label]');
-			const parsedLabel = parseAttachmentAriaLabel(
-				normalizeInlineText(button?.getAttribute('aria-label') ?? ''),
-			);
+			const button = thumb.querySelector("button[aria-label]");
+			const parsedLabel = parseAttachmentAriaLabel(normalizeInlineText(button?.getAttribute("aria-label") ?? ""));
 			if (parsedLabel.title) {
 				return formatArtifactEntry(parsedLabel.title, parsedLabel.meta);
 			}
 
-			const name = normalizeInlineText(thumb.querySelector('h3')?.textContent ?? '');
-			const type = normalizeInlineText(thumb.querySelector('p')?.textContent ?? '');
-			if (!name && !type) return '';
-			if (type) return `${escapeMarkdown(name || 'Attachment')} (${escapeMarkdown(type)})`;
-			return escapeMarkdown(name || 'Attachment');
+			const name = normalizeInlineText(thumb.querySelector("h3")?.textContent ?? "");
+			const type = normalizeInlineText(thumb.querySelector("p")?.textContent ?? "");
+			if (!name && !type) return "";
+			if (type) return `${escapeMarkdown(name || "Attachment")} (${escapeMarkdown(type)})`;
+			return escapeMarkdown(name || "Attachment");
 		})
 		.filter((entry) => entry.length > 0);
 
@@ -412,7 +383,7 @@ function extractUserAttachments(node: Element): string[] {
 function extractAssistantMarkdown(node: Element): string {
 	const markdownChunks: string[] = [];
 	const thinking = extractThinkingSummaries(node);
-	const thinkingSection = formatListSection('Thinking', thinking);
+	const thinkingSection = formatListSection("Thinking", thinking);
 	if (thinkingSection) markdownChunks.push(thinkingSection);
 
 	const thinkingDetails = extractExpandedThinkingDetails(node);
@@ -441,10 +412,10 @@ function extractAssistantMarkdown(node: Element): string {
 	}
 
 	const artifacts = extractArtifactEntries(node);
-	const artifactSection = formatListSection('Artifacts', artifacts);
+	const artifactSection = formatListSection("Artifacts", artifacts);
 	if (artifactSection) markdownChunks.push(artifactSection);
 
-	return markdownChunks.join('\n\n').trimEnd();
+	return markdownChunks.join("\n\n").trimEnd();
 }
 
 function extractUserMarkdown(node: Element): string {
@@ -456,30 +427,30 @@ function extractUserMarkdown(node: Element): string {
 	if (markdown) markdownChunks.push(markdown);
 
 	const attachments = extractUserAttachments(node);
-	const attachmentSection = formatListSection('Attachments', attachments);
+	const attachmentSection = formatListSection("Attachments", attachments);
 	if (attachmentSection) markdownChunks.push(attachmentSection);
 
-	return markdownChunks.join('\n\n').trimEnd();
+	return markdownChunks.join("\n\n").trimEnd();
 }
 
 function processMessageCandidate(node: Element): Message | null {
 	if (isSystemMessage(node)) return null;
 	const isUser = node.matches(USER_SELECTOR);
-	const wrapper = node.closest('[data-test-render-count]');
+	const wrapper = node.closest("[data-test-render-count]");
 	if (!isUser && !wrapper && !node.matches(CLAUDE_SELECTORS.assistantMessage.primary)) {
 		return null;
 	}
 
-	const role: 'user' | 'assistant' = isUser ? 'user' : 'assistant';
+	const role: "user" | "assistant" = isUser ? "user" : "assistant";
 	const markdown = isUser ? extractUserMarkdown(node) : extractAssistantMarkdown(node);
 	const timestamp = extractMessageTimestamp(node);
 
 	if (!markdown.trim()) {
 		if (isStreamingMessage(node)) {
 			if (timestamp) {
-				return { role, markdown: '> [Message is still streaming and was skipped]', timestamp };
+				return { role, markdown: "> [Message is still streaming and was skipped]", timestamp };
 			}
-			return { role, markdown: '> [Message is still streaming and was skipped]' };
+			return { role, markdown: "> [Message is still streaming and was skipped]" };
 		}
 		return null;
 	}
@@ -496,9 +467,7 @@ function processMessageCandidate(node: Element): Message | null {
  */
 export function extractClaudeConversation(): Message[] {
 	const root = findChatRoot();
-	const candidates = Array.from(root.querySelectorAll(MESSAGE_SELECTOR)).filter(
-		(node) => node.parentElement?.closest(MESSAGE_SELECTOR) === null,
-	);
+	const candidates = Array.from(root.querySelectorAll(MESSAGE_SELECTOR)).filter((node) => node.parentElement?.closest(MESSAGE_SELECTOR) === null);
 	const messages: Message[] = [];
 
 	for (const node of candidates) {
@@ -519,12 +488,12 @@ export function deriveClaudeTitle(): string {
 	if (titleButton?.textContent) {
 		return titleButton.textContent.trim();
 	}
-	return document.title?.replace(/\s+[-|].*$/, '').trim() ?? '';
+	return document.title?.replace(/\s+[-|].*$/, "").trim() ?? "";
 }
 
 export const claudeAdapter: PlatformConfig = {
-	platform: 'claude',
-	displayName: 'Claude',
+	platform: "claude",
+	displayName: "Claude",
 	ensureButton: ensureClaudeButton,
 	prepareForExport: prepareClaudeConversationForExport,
 	extractConversation: extractClaudeConversation,

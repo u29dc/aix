@@ -1,11 +1,11 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 /**
  * Get the absolute path to a fixture file
  */
 export function getFixturePath(name: string): string {
-	return resolve(import.meta.dir, '..', 'fixtures', name);
+	return resolve(import.meta.dir, "..", "fixtures", name);
 }
 
 /**
@@ -13,7 +13,7 @@ export function getFixturePath(name: string): string {
  */
 export function loadFixture(name: string): string {
 	const path = getFixturePath(name);
-	return readFileSync(path, 'utf-8');
+	return readFileSync(path, "utf-8");
 }
 
 /**
@@ -22,7 +22,7 @@ export function loadFixture(name: string): string {
 export function parseFixture(name: string): Document {
 	const html = loadFixture(name);
 	const parser = new DOMParser();
-	return parser.parseFromString(html, 'text/html');
+	return parser.parseFromString(html, "text/html");
 }
 
 /**
@@ -30,7 +30,7 @@ export function parseFixture(name: string): Document {
  */
 export function parseHTML(html: string): Document {
 	const parser = new DOMParser();
-	return parser.parseFromString(html, 'text/html');
+	return parser.parseFromString(html, "text/html");
 }
 
 /**
