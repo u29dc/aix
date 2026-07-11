@@ -109,9 +109,8 @@ async function exportConversation(): Promise<string> {
 		throw new Error('No platform adapter available');
 	}
 
-	await adapter.prepareForExport?.();
-
-	const messages = adapter.extractConversation();
+	const preparedMessages = await adapter.prepareForExport?.();
+	const messages = preparedMessages ?? adapter.extractConversation();
 	if (!messages.length) {
 		throw new Error('No messages found in this conversation.');
 	}

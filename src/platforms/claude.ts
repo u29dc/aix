@@ -354,10 +354,10 @@ function waitForNextFrame(): Promise<void> {
  * Expand Claude thinking/status panels before extraction so visible inner reasoning
  * and progress outlines are captured when Claude lazily renders them on open.
  */
-export async function prepareClaudeConversationForExport(): Promise<void> {
+export async function prepareClaudeConversationForExport(): Promise<Message[] | undefined> {
 	const root = findChatRoot();
 	const buttons = Array.from(root.querySelectorAll(COLLAPSED_THINKING_SELECTOR));
-	if (buttons.length === 0) return;
+	if (buttons.length === 0) return undefined;
 
 	for (const button of buttons) {
 		if (!(button instanceof HTMLElement)) continue;
@@ -368,6 +368,7 @@ export async function prepareClaudeConversationForExport(): Promise<void> {
 	await waitForNextFrame();
 	await waitForNextFrame();
 	await new Promise((resolve) => window.setTimeout(resolve, 75));
+	return undefined;
 }
 
 function parseAttachmentAriaLabel(label: string): { title: string; meta: string } {

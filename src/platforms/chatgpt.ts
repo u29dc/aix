@@ -2,6 +2,11 @@ import { BUTTON_ID, CHATGPT_BUTTON_CLASS_FALLBACK, SANITIZE_SELECTORS } from '@/
 import { convertNodeToMarkdown } from '@/parsers';
 import { sanitizeElement } from '@/parsers/sanitizer';
 import {
+	ChatGPTApiUnavailableError,
+	extractChatGPTConversationFromApi,
+	type ChatGPTTurnShell,
+} from '@/platforms/chatgpt-api';
+import {
 	buildCombinedSelector,
 	CHATGPT_SELECTORS,
 	querySelector,
@@ -25,6 +30,18 @@ const ASSISTANT_SELECTOR = buildCombinedSelector(CHATGPT_SELECTORS.assistantMess
 const CHATGPT_ASSISTANT_BLOCK_SELECTOR = '.markdown, .prose, [data-message-content]';
 const CHATGPT_USER_BLOCK_SELECTOR =
 	'.whitespace-pre-wrap, .markdown, .prose, [data-message-content]';
+const DEFAULT_HYDRATION_TIMEOUT_MS = 3000;
+const DEFAULT_HYDRATION_POLL_INTERVAL_MS = 40;
+
+interface ChatGPTPreparationOptions {
+	hydrationTimeoutMs?: number;
+	pollIntervalMs?: number;
+	fetcher?: typeof fetch;
+}
+
+interface PreparedMessage {
+	message: Message;
+}
 
 /**
  * Check if current page is an eligible ChatGPT conversation
@@ -201,6 +218,216 @@ function deriveRole(turn: Element): 'user' | 'assistant' | null {
 	return null;
 }
 
+function extractTurnMessage(turn: Element): Message | null {
+	const role = deriveRole(turn);
+	if (!role) return null;
+
+	const markdown = role === 'user' ? extractUserMarkdown(turn) : extractAssistantMarkdown(turn);
+	if (!markdown.trim()) return null;
+
+	return { role, markdown };
+}
+
+function getTurnKey(turn: Element, index: number): string {
+	return (
+		turn.getAttribute('data-turn-id') ??
+		turn.getAttribute('data-testid') ??
+		`conversation-turn-${index}`
+	);
+}
+
+function getConversationId(pathname: string): string | null {
+	const match = pathname.match(/\/c\/([^/]+)/i);
+	return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
+function getOrderedTurnShells(turns: Element[]): ChatGPTTurnShell[] | null {
+	const shells: ChatGPTTurnShell[] = [];
+	for (const turn of turns) {
+		const id = turn.getAttribute('data-turn-id');
+		const role = deriveRole(turn);
+		if (!id || !role) return null;
+		shells.push({ id, role });
+	}
+	return shells;
+}
+
+function hasSameTurnShells(expected: ChatGPTTurnShell[]): boolean {
+	const currentTurns = querySelectorAll(document, CHATGPT_SELECTORS.conversationTurn);
+	const current = getOrderedTurnShells(currentTurns);
+	if (!current || current.length !== expected.length) return false;
+	return current.every(
+		(shell, index) => shell.id === expected[index]?.id && shell.role === expected[index]?.role,
+	);
+}
+
+function collectHydratedMessages(turns: Element[], prepared: Map<string, PreparedMessage>): void {
+	for (const [index, turn] of turns.entries()) {
+		const key = getTurnKey(turn, index);
+		if (prepared.has(key)) continue;
+		if (turn.childElementCount === 0) continue;
+
+		const message = extractTurnMessage(turn);
+		if (message) prepared.set(key, { message });
+	}
+}
+
+function findScrollableAncestor(turn: Element): HTMLElement | null {
+	let current = turn.parentElement;
+	while (current) {
+		const overflowY = window.getComputedStyle(current).overflowY;
+		if (/(auto|scroll)/i.test(overflowY) && current.scrollHeight > current.clientHeight) {
+			return current;
+		}
+		current = current.parentElement;
+	}
+
+	return document.scrollingElement instanceof HTMLElement ? document.scrollingElement : null;
+}
+
+function wait(delay: number): Promise<void> {
+	return new Promise((resolve) => window.setTimeout(resolve, delay));
+}
+
+async function waitForTurnHydration(
+	turns: Element[],
+	targetKey: string,
+	prepared: Map<string, PreparedMessage>,
+	timeoutMs: number,
+	pollIntervalMs: number,
+): Promise<boolean> {
+	const deadline = Date.now() + timeoutMs;
+
+	do {
+		collectHydratedMessages(turns, prepared);
+		if (prepared.has(targetKey)) {
+			// Neighbouring turns can mount just after the target. Give that batch one
+			// final opportunity to settle before moving the virtualized viewport.
+			await wait(pollIntervalMs);
+			collectHydratedMessages(turns, prepared);
+			return true;
+		}
+		await wait(pollIntervalMs);
+	} while (Date.now() < deadline);
+
+	collectHydratedMessages(turns, prepared);
+	return prepared.has(targetKey);
+}
+
+/**
+ * Hydrate ChatGPT's virtualized turn shells and snapshot each message before it
+ * can be unmounted again. The snapshot is returned directly to the export flow
+ * and is never persisted in module state.
+ */
+async function prepareChatGPTConversationViaDom(
+	options: ChatGPTPreparationOptions = {},
+): Promise<Message[]> {
+	const turns = querySelectorAll(document, CHATGPT_SELECTORS.conversationTurn);
+	if (turns.length === 0) return extractChatGPTConversation();
+	const conversationUrl = window.location.href;
+	const turnKeys = turns.map((turn, index) => getTurnKey(turn, index));
+
+	const prepared = new Map<string, PreparedMessage>();
+	collectHydratedMessages(turns, prepared);
+
+	if (prepared.size === turns.length) {
+		return turns
+			.map((turn, index) => prepared.get(getTurnKey(turn, index))?.message)
+			.filter((message): message is Message => message !== undefined);
+	}
+
+	const scrollContainer = findScrollableAncestor(turns[0] as Element);
+	if (!scrollContainer) {
+		throw new Error('ChatGPT conversation scroller was not found. Export cancelled.');
+	}
+
+	const originalScrollTop = scrollContainer.scrollTop;
+	const originalMaxScrollTop = Math.max(
+		0,
+		scrollContainer.scrollHeight - scrollContainer.clientHeight,
+	);
+	const wasAtBottom = originalMaxScrollTop - originalScrollTop <= 2;
+	const hydrationTimeoutMs = options.hydrationTimeoutMs ?? DEFAULT_HYDRATION_TIMEOUT_MS;
+	const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_HYDRATION_POLL_INTERVAL_MS;
+
+	try {
+		for (const [index, turn] of turns.entries()) {
+			const key = getTurnKey(turn, index);
+			if (prepared.has(key)) continue;
+			if (window.location.href !== conversationUrl || !turn.isConnected) {
+				throw new Error('ChatGPT conversation changed during export. Export cancelled.');
+			}
+
+			turn.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
+			const hydrated = await waitForTurnHydration(
+				turns,
+				key,
+				prepared,
+				hydrationTimeoutMs,
+				pollIntervalMs,
+			);
+			if (!hydrated) {
+				throw new Error(
+					`ChatGPT did not load turn ${index + 1} of ${turns.length}. Export cancelled to avoid a partial file.`,
+				);
+			}
+		}
+
+		const messages = turns.map((turn, index) => prepared.get(getTurnKey(turn, index))?.message);
+		const currentTurns = querySelectorAll(document, CHATGPT_SELECTORS.conversationTurn);
+		const currentTurnKeys = currentTurns.map((turn, index) => getTurnKey(turn, index));
+		if (
+			window.location.href !== conversationUrl ||
+			currentTurnKeys.length !== turnKeys.length ||
+			currentTurnKeys.some((key, index) => key !== turnKeys[index])
+		) {
+			throw new Error('ChatGPT conversation changed during export. Export cancelled.');
+		}
+		if (messages.some((message) => message === undefined)) {
+			throw new Error('ChatGPT did not load every conversation turn. Export cancelled.');
+		}
+
+		return messages.filter((message): message is Message => message !== undefined);
+	} finally {
+		scrollContainer.scrollTop = wasAtBottom
+			? Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight)
+			: originalScrollTop;
+	}
+}
+
+/**
+ * Prefer ChatGPT's complete same-origin conversation response, using the DOM's
+ * lightweight turn shells as the authoritative order and role manifest. Fall
+ * back to progressive DOM hydration when the private API or its schema changes.
+ */
+export async function prepareChatGPTConversationForExport(
+	options: ChatGPTPreparationOptions = {},
+): Promise<Message[]> {
+	const turns = querySelectorAll(document, CHATGPT_SELECTORS.conversationTurn);
+	if (turns.length === 0) return extractChatGPTConversation();
+
+	const conversationUrl = window.location.href;
+	const conversationId = getConversationId(window.location.pathname);
+	const shells = getOrderedTurnShells(turns);
+	if (conversationId && shells) {
+		try {
+			const messages = await extractChatGPTConversationFromApi({
+				conversationId,
+				shells,
+				...(options.fetcher ? { fetcher: options.fetcher } : {}),
+			});
+			if (window.location.href !== conversationUrl || !hasSameTurnShells(shells)) {
+				throw new Error('ChatGPT conversation changed during export. Export cancelled.');
+			}
+			return messages;
+		} catch (error) {
+			if (!(error instanceof ChatGPTApiUnavailableError)) throw error;
+		}
+	}
+
+	return prepareChatGPTConversationViaDom(options);
+}
+
 /**
  * Extract conversation messages from ChatGPT DOM
  */
@@ -219,13 +446,8 @@ export function extractChatGPTConversation(): Message[] {
 	}
 
 	for (const turn of turns) {
-		const role = deriveRole(turn);
-		if (!role) continue;
-
-		const markdown = role === 'user' ? extractUserMarkdown(turn) : extractAssistantMarkdown(turn);
-		if (!markdown.trim()) continue;
-
-		messages.push({ role, markdown });
+		const message = extractTurnMessage(turn);
+		if (message) messages.push(message);
 	}
 
 	return messages;
@@ -244,6 +466,7 @@ export const chatgptAdapter: PlatformConfig = {
 	platform: 'chatgpt',
 	displayName: 'ChatGPT',
 	ensureButton: ensureChatGPTButton,
+	prepareForExport: prepareChatGPTConversationForExport,
 	extractConversation: extractChatGPTConversation,
 	deriveTitle: deriveChatGPTTitle,
 	isEligibleConversation: isEligibleChatGPTConversation,

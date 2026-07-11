@@ -4,6 +4,7 @@ import {
 	deriveChatGPTTitle,
 	extractChatGPTConversation,
 	isEligibleChatGPTConversation,
+	prepareChatGPTConversationForExport,
 } from '@/platforms/chatgpt';
 
 function createStandardTurn(
@@ -243,5 +244,44 @@ describe('extractChatGPTConversation', () => {
 		expect(messages).toHaveLength(1);
 		expect(messages[0]?.role).toBe('assistant');
 		expect(messages[0]?.markdown).toContain('Standalone markdown block');
+	});
+});
+
+describe('prepareChatGPTConversationForExport', () => {
+	test.serial('cancels partial exports and restores the original scroll position', async () => {
+		const scrollRoot = createElement('div', { style: 'overflow-y: auto' });
+		const main = createElement('main');
+		scrollRoot.appendChild(main);
+		document.body.appendChild(scrollRoot);
+
+		Object.defineProperties(scrollRoot, {
+			clientHeight: { configurable: true, value: 100 },
+			scrollHeight: { configurable: true, value: 300 },
+		});
+		scrollRoot.scrollTop = 200;
+
+		const first = createFallbackTurn(0, 'user', [
+			createElement('div', { class: 'whitespace-pre-wrap' }, ['Synthetic prompt']),
+		]);
+		const missing = createFallbackTurn(1, 'assistant', []);
+		first.setAttribute('data-turn-id', 'synthetic-first');
+		missing.setAttribute('data-turn-id', 'synthetic-missing');
+		main.append(first, missing);
+		first.scrollIntoView = () => undefined;
+		missing.scrollIntoView = () => {
+			scrollRoot.scrollTop = 100;
+		};
+
+		try {
+			await expect(
+				prepareChatGPTConversationForExport({
+					hydrationTimeoutMs: 5,
+					pollIntervalMs: 1,
+				}),
+			).rejects.toThrow('Export cancelled to avoid a partial file');
+			expect(scrollRoot.scrollTop).toBe(200);
+		} finally {
+			document.body.innerHTML = '';
+		}
 	});
 });

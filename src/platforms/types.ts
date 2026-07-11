@@ -4,7 +4,7 @@ export interface PlatformConfig {
 	platform: Platform;
 	displayName: string;
 	ensureButton(): boolean;
-	prepareForExport?(): Promise<void> | void;
+	prepareForExport?(): Promise<Message[] | undefined>;
 	extractConversation(): Message[];
 	deriveTitle(): string;
 	isEligibleConversation(): boolean;
